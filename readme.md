@@ -56,7 +56,7 @@ Montant total épargné / total des crédits accordés
 
 🧱 Pages à créer dans le site (backend uniquement, agent/admin)
 
-          | Page                         | Objectif                            |
+| Page                         | Objectif                                      |
 
 | ---------------------------- | --------------------------------------------- |
 | Page de connexion            | Authentifier les agents                       |
