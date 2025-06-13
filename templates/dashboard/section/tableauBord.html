@@ -1,0 +1,309 @@
+{%extends "../home.html"%}
+{%block content%}
+
+<style>
+  .container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  /* Main Content */
+  .main {
+    padding: 2rem 0;
+  }
+
+  .welcome-section {
+    margin-bottom: 2rem;
+  }
+
+  .welcome-section h2 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #111827;
+    margin-bottom: 0.5rem;
+  }
+
+  .welcome-section p {
+    color: #6b7280;
+  }
+
+  /* Stats Grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-card {
+    background: white;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  }
+
+  .stat-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .stat-info {
+    flex: 1;
+  }
+
+  .stat-title {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #6b7280;
+    margin-bottom: 0.25rem;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #111827;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-change {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .change-positive {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #059669;
+  }
+
+  .change-label {
+    font-size: 0.75rem;
+    color: #6b7280;
+  }
+
+  .stat-icon {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.25rem;
+  }
+
+  .bg-blue {
+    background-color: #3b82f6;
+  }
+  .bg-green {
+    background-color: #10b981;
+  }
+  .bg-purple {
+    background-color: #8b5cf6;
+  }
+  .bg-emerald {
+    background-color: #10b981;
+  }
+  .bg-orange {
+    background-color: #f59e0b;
+  }
+  .bg-indigo {
+    background-color: #6366f1;
+  }
+
+  /* Charts Section */
+  .charts-section {
+    margin-top: 2rem;
+  }
+
+  .chart-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .trend-chart {
+    margin-top: 2rem;
+  }
+
+  .chart-card {
+    background: white;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  }
+
+  .chart-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .chart-header h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 0.5rem;
+  }
+
+  .chart-header p {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+
+  .chart-content {
+    height: 300px;
+    position: relative;
+  }
+
+  .trend-chart .chart-content {
+    height: 400px;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .container {
+      padding: 0 0.5rem;
+    }
+
+    .header-content {
+      flex-direction: column;
+      text-align: center;
+      gap: 1rem;
+    }
+
+    .stats-grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .chart-container {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .stat-card {
+      padding: 1rem;
+    }
+
+    .chart-card {
+      padding: 1rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .stat-content {
+      flex-direction: column;
+      text-align: center;
+      gap: 1rem;
+    }
+
+    .stat-info {
+      text-align: center;
+    }
+
+    .chart-content {
+      height: 250px;
+    }
+
+    .trend-chart .chart-content {
+      height: 300px;
+    }
+  }
+</style>
+
+<!-- Main Content -->
+<div class="container">
+  <div class="page-inner">
+    <!-- Welcome Section -->
+    <section class="welcome-section">
+      <h2>Bienvenue sur votre tableau de bord</h2>
+      <p>Vue d'ensemble de l'activité de votre plateforme de microfinance</p>
+    </section>
+
+    <!-- Stats Cards -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-content">
+          <div class="stat-info">
+            <p class="stat-title">Clients Total</p>
+            <p class="stat-value">{{ nombre_clients }}</p>
+          </div>
+          <div class="stat-icon bg-blue">
+            <i class="fas fa-users"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-content">
+          <div class="stat-info">
+            <p class="stat-title">Solde Total</p>
+            <p class="stat-value">{{ solde_total }} Fcfa</p>
+          </div>
+          <div class="stat-icon bg-green">
+            <i class="fas fa-file-text"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-content">
+          <div class="stat-info">
+            <p class="stat-title">Total des Crédits</p>
+            <p class="stat-value">{{total_credit}} Fcfa</p>
+          </div>
+          <div class="stat-icon bg-purple">
+            <i class="fas fa-chart-bar"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-content">
+          <div class="stat-info">
+            <p class="stat-title">Total Dépôts</p>
+            <p class="stat-value">{{total_depot}} Fcfa</p>
+          </div>
+          <div class="stat-icon bg-emerald">
+            <i class="fas fa-chart-bar"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-content">
+          <div class="stat-info">
+            <p class="stat-title">Total de retrait</p>
+            <p class="stat-value">{{total_retrait}} Fcfa</p>
+          </div>
+          <div class="stat-icon bg-orange">
+            <i class="fas fa-chart-bar"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-content">
+          <div class="stat-info">
+            <p class="stat-title">Montant Remboursé</p>
+            <p class="stat-value">{{total_remboursement}} Fcfa</p>
+          </div>
+          <div class="stat-icon bg-indigo">
+            <i class="fas fa-chart-bar"></i>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+{%endblock%}

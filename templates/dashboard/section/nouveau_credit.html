@@ -1,0 +1,105 @@
+      <div class="modal-body">
+        <form id="addCreditForm">
+          <div class="form-group">
+            <label for="clientSelect"
+              >Client <span class="required">*</span></label
+            >
+            <select id="clientSelect" name="client" required>
+              <option value="">Sélectionner un client</option>
+              <option value="CLI001">Jean Dupont</option>
+              <option value="CLI002">Marie Martin</option>
+              <option value="CLI003">Pierre Durand</option>
+              <option value="CLI004">Sophie Leblanc</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="creditAmount"
+                >Montant (€) <span class="required">*</span></label
+              >
+              <input
+                type="number"
+                id="creditAmount"
+                name="amount"
+                step="100"
+                min="1000"
+                placeholder="10000"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="creditRate"
+                >Taux annuel (%) <span class="required">*</span></label
+              >
+              <input
+                type="number"
+                id="creditRate"
+                name="rate"
+                step="0.1"
+                min="0.1"
+                max="20"
+                placeholder="3.5"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="creditDuration"
+                >Durée (mois) <span class="required">*</span></label
+              >
+              <input
+                type="number"
+                id="creditDuration"
+                name="duration"
+                min="6"
+                max="360"
+                placeholder="60"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="creditType"
+                >Type de crédit <span class="required">*</span></label
+              >
+              <select id="creditType" name="type" required>
+                <option value="personnel">Crédit Personnel</option>
+                <option value="immobilier">Crédit Immobilier</option>
+                <option value="auto">Crédit Auto</option>
+                <option value="consommation">Crédit Consommation</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="creditPurpose">Objet du crédit</label>
+            <textarea
+              id="creditPurpose"
+              name="purpose"
+              rows="3"
+              placeholder="Description de l'utilisation prévue du crédit..."
+            ></textarea>
+          </div>
+
+          <div
+            style="
+              display: flex;
+              justify-content: flex-end;
+              gap: 16px;
+              margin-top: 24px;
+            "
+          >
+            <button
+              type="button"
+              class="btn btn-outline"
+              onclick="closeModal('addCreditModal')"
+            >
+              Annuler
+            </button>
+            <button type="submit" class="btn btn-primary">
+              Créer le Crédit
+            </button>
+          </div>
+        </form>

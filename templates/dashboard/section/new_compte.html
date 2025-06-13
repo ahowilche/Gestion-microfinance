@@ -1,0 +1,510 @@
+{%extends "../home.html"%} {%block content%}
+<style>
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border: 1px solid #d1d5db;
+    background: white;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #374151;
+    font-size: 14px;
+    transition: all 0.2s;
+  }
+
+  .back-btn:hover {
+    background-color: #f9fafb;
+  }
+
+  .header-info h1 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .header-info p {
+    color: #6b7280;
+    font-size: 14px;
+  }
+
+  .icon {
+    width: 32px;
+    height: 32px;
+    color: #2563eb;
+  }
+
+  .alert {
+    display: none;
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    border: 1px solid #22c55e;
+    background-color: #f0fdf4;
+    color: #15803d;
+  }
+
+  .alert.show {
+    display: block;
+  }
+
+  .card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+  }
+
+  .card-header {
+    padding: 24px 24px 0;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 24px;
+  }
+
+  .card-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+
+  .card-content {
+    padding: 0 24px 24px;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .form-group.full-width {
+    grid-column: 1 / -1;
+  }
+
+  label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+  }
+
+  .required {
+    color: #ef4444;
+  }
+
+  input,
+  select {
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.2s;
+    background: white;
+  }
+
+  input:focus,
+  select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+
+  .error {
+    border-color: #ef4444 !important;
+  }
+
+  .error-message {
+    color: #ef4444;
+    font-size: 12px;
+    margin-top: 4px;
+  }
+
+  .help-text {
+    color: #6b7280;
+    font-size: 12px;
+    margin-top: 4px;
+  }
+
+  .info-box {
+    background-color: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    padding: 16px;
+    margin: 24px 0;
+  }
+
+  .info-box h3 {
+    color: #1e40af;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .info-box ul {
+    color: #1e40af;
+    font-size: 12px;
+    padding-left: 16px;
+  }
+
+  .info-box li {
+    margin-bottom: 4px;
+  }
+
+  .form-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+    padding-top: 24px;
+    border-top: 1px solid #e5e7eb;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-outline {
+    border: 1px solid #d1d5db;
+    background: white;
+    color: #374151;
+  }
+
+  .btn-outline:hover {
+    background-color: #f9fafb;
+  }
+
+  .btn-primary {
+    background-color: #2563eb;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background-color: #1d4ed8;
+  }
+
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .block {
+      padding: 16px;
+    }
+
+    .header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+      flex-direction: column-reverse;
+      align-items: stretch;
+    }
+
+    .btn {
+      justify-content: center;
+    }
+  }
+</style>
+
+<div class="container block">
+  <!-- En-tête -->
+  <div class="page-inner">
+    <div class="container block">
+      <!-- En-tête -->
+      <div class="header">
+        <div class="header-left">
+          <div class="header-info">
+            <h1>
+              {% if client %}Modifier le client{% else %}Ajouter un nouveau
+              client{% endif %}
+            </h1>
+            <p>
+              Formulaire pour {% if client %}mettre à jour{% else
+              %}enregistrer{% endif %} un client
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Message de succès -->
+      <div id="successAlert" class="alert">
+        <span id="successMessage"></span>
+      </div>
+
+      <!-- Formulaire -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Informations du client</h2>
+        </div>
+        <div class="card-content">
+          <form method="post">
+            {% csrf_token %}
+            <div class="form-grid">
+              <!-- Sélection client -->
+              <div class="form-group">
+                <label for="clientId"
+                  >Client <span class="required">*</span></label
+                >
+                <select name="clientId" id="clientId" required>
+                  <option value="">Sélectionner un client</option>
+                  {% for cl in clients %}
+                  <option value="{{ cl.id }}">
+                    {{ cl.nom }} {{ cl.prenom }}
+                  </option>
+                  {% endfor %}
+                </select>
+                <div class="error-message" id="clientIdError"></div>
+              </div>
+
+              <!-- Type compte -->
+              <div class="form-group">
+                <label for="accountType"
+                  >Type de compte <span class="required">*</span></label
+                >
+                <select name="accountType" id="accountType" required>
+                  <option value="">Sélectionner le type</option>
+                  <option value="epargne">Épargne</option>
+                  <option value="courant">Courant</option>
+                </select>
+                <div class="error-message" id="accountTypeError"></div>
+                <p class="help-text" id="minimumText">
+                  Choisissez un type de compte
+                </p>
+              </div>
+
+              <!-- Dépôt initial -->
+              <div class="form-group">
+                <label for="initialDeposit"
+                  >Dépôt initial (€) <span class="required">*</span></label
+                >
+                <input
+                  type="text"
+                  name="initialDeposit"
+                  id="initialDeposit"
+                  required
+                />
+                <div class="error-message" id="initialDepositError"></div>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <a href="#" class="btn btn-outline">Annuler</a>
+              <button type="submit" class="btn btn-primary">
+                Créer le compte
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const form = document.getElementById("accountForm");
+      const submitBtn = document.getElementById("submitBtn");
+      const successAlert = document.getElementById("successAlert");
+      const successMessage = document.getElementById("successMessage");
+      const accountTypeSelect = document.getElementById("accountType");
+      const minimumText = document.getElementById("minimumText");
+
+      // Mettre à jour le minimum selon le type de compte
+      accountTypeSelect.addEventListener("change", function () {
+        const type = this.value;
+        minimumText.textContent =
+          type === "courant" ? "Minimum: 100 €" : "Minimum: 50 €";
+      });
+
+      // Génération automatique du numéro de compte
+      function generateAccountNumber() {
+        const timestamp = Date.now().toString().slice(-6);
+        const random = Math.floor(Math.random() * 1000)
+          .toString()
+          .padStart(3, "0");
+        return `ACC${timestamp}${random}`;
+      }
+
+      // Validation du formulaire
+      function validateForm(formData) {
+        let isValid = true;
+        const errors = {};
+
+        // Effacer les erreurs précédentes
+        document
+          .querySelectorAll(".error-message")
+          .forEach((el) => (el.textContent = ""));
+        document
+          .querySelectorAll("input, select")
+          .forEach((el) => el.classList.remove("error"));
+
+        // Validation ID Client
+        if (!formData.clientId.trim()) {
+          errors.clientId = "L'ID du client est requis";
+          isValid = false;
+        }
+
+        // Validation dépôt initial
+        if (!formData.initialDeposit.trim()) {
+          errors.initialDeposit = "Le dépôt initial est requis";
+          isValid = false;
+        } else {
+          const amount = parseFloat(formData.initialDeposit);
+          if (isNaN(amount) || amount < 0) {
+            errors.initialDeposit = "Le montant doit être un nombre positif";
+            isValid = false;
+          } else if (formData.accountType === "courant" && amount < 100) {
+            errors.initialDeposit =
+              "Le dépôt minimum pour un compte courant est de 100 €";
+            isValid = false;
+          } else if (formData.accountType === "epargne" && amount < 50) {
+            errors.initialDeposit =
+              "Le dépôt minimum pour un compte épargne est de 50 €";
+            isValid = false;
+          }
+        }
+
+        // Afficher les erreurs
+        Object.keys(errors).forEach((field) => {
+          const errorElement = document.getElementById(field + "Error");
+          const inputElement = document.getElementById(field);
+          if (errorElement && inputElement) {
+            errorElement.textContent = errors[field];
+            inputElement.classList.add("error");
+          }
+        });
+
+        return isValid;
+      }
+
+      // Soumission du formulaire
+      form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const formData = {
+          clientId: document.getElementById("clientId").value,
+          accountType: document.getElementById("accountType").value,
+          initialDeposit: document.getElementById("initialDeposit").value,
+          accountNumber: document.getElementById("accountNumber").value,
+          description: document.getElementById("description").value,
+        };
+
+        if (!validateForm(formData)) {
+          return;
+        }
+
+        // Désactiver le bouton et afficher le spinner
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `
+                <div class="spinner"></div>
+                Création...
+            `;
+
+        try {
+          // Génération du numéro de compte si pas fourni
+          const accountNumber =
+            formData.accountNumber || generateAccountNumber();
+
+          // Simulation de l'envoi des données
+          const accountData = {
+            ...formData,
+            accountNumber,
+            createdAt: new Date().toISOString(),
+            balance: parseFloat(formData.initialDeposit),
+          };
+
+          console.log("Données du nouveau compte:", accountData);
+
+          // Simulation d'un délai de traitement
+          await new Promise((resolve) => setTimeout(resolve, 1500));
+
+          // Afficher le message de succès
+          successMessage.textContent = `Compte ${accountData.accountNumber} créé avec succès!`;
+          successAlert.classList.add("show");
+
+          // Réinitialiser le formulaire après succès
+          setTimeout(() => {
+            form.reset();
+            successAlert.classList.remove("show");
+            minimumText.textContent = "Minimum: 100 €"; // Reset au type par défaut
+          }, 3000);
+        } catch (error) {
+          console.error("Erreur lors de la création du compte:", error);
+          alert("Une erreur est survenue lors de la création du compte.");
+        } finally {
+          // Réactiver le bouton
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = `
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3-3m0 0l-3 3m3-3v12"></path>
+                    </svg>
+                    Créer le compte
+                `;
+        }
+      });
+
+      // Effacer les erreurs lors de la saisie
+      document.querySelectorAll("input, select").forEach((element) => {
+        element.addEventListener("input", function () {
+          this.classList.remove("error");
+          const errorElement = document.getElementById(this.name + "Error");
+          if (errorElement) {
+            errorElement.textContent = "";
+          }
+        });
+      });
+    </script>
+    {%endblock content%}
+  </div>
+</div>

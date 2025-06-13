@@ -1,0 +1,616 @@
+{%extends "../home.html"%} {%block content%}
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+
+    .welcome-section {
+    margin-bottom: 2rem;
+  }
+
+  .welcome-section h2 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #111827;
+    margin-bottom: 0.5rem;
+  }
+
+  .welcome-section p {
+    color: #6b7280;
+  }
+
+  .card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+  }
+
+  .card-header {
+    padding: 24px 24px 16px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .card-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+
+  .filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .filter-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #374151;
+  }
+
+  .filter-input {
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    background: white;
+  }
+
+  .card-content {
+    padding: 24px;
+  }
+
+  .transactions-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .transactions-table th,
+  .transactions-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .transactions-table th {
+    font-weight: 600;
+    color: #374151;
+    background-color: #f9fafb;
+  }
+
+  .transaction-type {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .type-depot {
+    background-color: #dcfce7;
+    color: #166534;
+  }
+
+  .type-retrait {
+    background-color: #fee2e2;
+    color: #dc2626;
+  }
+
+  .type-virement {
+    background-color: #dbeafe;
+    color: #1e40af;
+  }
+
+  .amount {
+    font-weight: 600;
+  }
+
+  .amount.positive {
+    color: #059669;
+  }
+
+  .amount.negative {
+    color: #dc2626;
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 24px;
+  }
+
+  .pagination button {
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    background: white;
+    color: #374151;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  .pagination button:hover:not(:disabled) {
+    background-color: #f9fafb;
+  }
+
+  .pagination button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .pagination .active {
+    background-color: #2563eb;
+    color: white;
+    border-color: #2563eb;
+  }
+
+  .summary-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .stat-item {
+    text-align: center;
+    padding: 16px;
+    background: #f8fafc;
+    border-radius: 8px;
+  }
+
+  .stat-value {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .stat-value.positive {
+    color: #059669;
+  }
+
+  .stat-value.negative {
+    color: #dc2626;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: #6b7280;
+  }
+
+  @media (max-width: 768px) {
+    .container {
+      padding: 16px;
+    }
+
+    .filters {
+      grid-template-columns: 1fr;
+    }
+
+    .transactions-table {
+      font-size: 14px;
+    }
+
+    .summary-stats {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>
+
+<div class="container">
+  <div class="page-inner">
+
+    <section class="welcome-section">
+      <h2>Historique des Transactions</h2>
+      <p>Consultez l'historique complet de toutes les transactions</p>
+    </section>
+
+    <!-- Statistiques résumées -->
+    <div class="summary-stats">
+      <div class="stat-item">
+        <div class="stat-value" id="totalTransactions">1,247</div>
+        <div class="stat-label">Total Transactions</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value positive" id="totalDeposits">+2,847,235 €</div>
+        <div class="stat-label">Total Dépôts</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value negative" id="totalWithdrawals">
+          -1,523,890 €
+        </div>
+        <div class="stat-label">Total Retraits</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value positive" id="netBalance">+1,323,345 €</div>
+        <div class="stat-label">Solde Net</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Filtres</h2>
+        <div class="filters">
+          <div class="filter-group">
+            <label class="filter-label">Date de début</label>
+            <input type="date" id="startDate" class="filter-input" />
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Date de fin</label>
+            <input type="date" id="endDate" class="filter-input" />
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Type de transaction</label>
+            <select id="typeFilter" class="filter-input">
+              <option value="">Tous les types</option>
+              <option value="depot">Dépôt</option>
+              <option value="retrait">Retrait</option>
+              <option value="virement">Virement</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Client</label>
+            <input
+              type="text"
+              id="clientFilter"
+              class="filter-input"
+              placeholder="Nom du client..."
+            />
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Montant minimum</label>
+            <input
+              type="number"
+              id="minAmount"
+              class="filter-input"
+              placeholder="0"
+            />
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Montant maximum</label>
+            <input
+              type="number"
+              id="maxAmount"
+              class="filter-input"
+              placeholder="10000"
+            />
+          </div>
+        </div>
+      </div>
+      <div class="card-content">
+        <div style="overflow-x: auto">
+          <table class="transactions-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Client</th>
+                <th>Compte</th>
+                <th>Montant</th>
+                <th>Description</th>
+                <th>Solde après</th>
+              </tr>
+            </thead>
+            <tbody id="transactionsTableBody">
+              <!-- Les transactions seront ajoutées ici par JavaScript -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination" id="pagination">
+          <!-- La pagination sera générée ici -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Données de test pour les transactions
+  const allTransactions = [
+    {
+      id: "TXN001",
+      date: "2024-05-24",
+      type: "depot",
+      client: "Jean Dupont",
+      account: "ACC1234567890",
+      amount: 500.0,
+      description: "Versement espèces",
+      balanceAfter: 15747.5,
+    },
+    {
+      id: "TXN002",
+      date: "2024-05-24",
+      type: "retrait",
+      client: "Marie Martin",
+      account: "ACC1234567891",
+      amount: -200.0,
+      description: "Retrait ATM",
+      balanceAfter: 8756.25,
+    },
+    {
+      id: "TXN003",
+      date: "2024-05-23",
+      type: "virement",
+      client: "Pierre Durand",
+      account: "ACC1234567892",
+      amount: 1000.0,
+      description: "Virement reçu",
+      balanceAfter: 850.0,
+    },
+    {
+      id: "TXN004",
+      date: "2024-05-23",
+      type: "depot",
+      client: "Sophie Leblanc",
+      account: "ACC1234567893",
+      amount: 2500.0,
+      description: "Dépôt chèque",
+      balanceAfter: 25978.9,
+    },
+    {
+      id: "TXN005",
+      date: "2024-05-22",
+      type: "retrait",
+      client: "Jean Dupont",
+      account: "ACC1234567890",
+      amount: -150.0,
+      description: "Retrait espèces",
+      balanceAfter: 15247.5,
+    },
+    {
+      id: "TXN006",
+      date: "2024-05-22",
+      type: "depot",
+      client: "Marie Martin",
+      account: "ACC1234567891",
+      amount: 800.0,
+      description: "Virement salaire",
+      balanceAfter: 8956.25,
+    },
+    {
+      id: "TXN007",
+      date: "2024-05-21",
+      type: "retrait",
+      client: "Pierre Durand",
+      account: "ACC1234567892",
+      amount: -300.0,
+      description: "Prélèvement loyer",
+      balanceAfter: -150.0,
+    },
+    {
+      id: "TXN008",
+      date: "2024-05-21",
+      type: "depot",
+      client: "Sophie Leblanc",
+      account: "ACC1234567893",
+      amount: 1200.0,
+      description: "Versement épargne",
+      balanceAfter: 23478.9,
+    },
+  ];
+
+  let currentPage = 1;
+  const itemsPerPage = 10;
+  let filteredTransactions = [...allTransactions];
+
+  function formatCurrency(amount) {
+    const absAmount = Math.abs(amount);
+    const formatted = new Intl.NumberFormat("fr-FR", {
+      style: "currency",
+      currency: "EUR",
+    }).format(absAmount);
+
+    return amount < 0 ? `-${formatted}` : `+${formatted}`;
+  }
+
+  function formatDate(dateString) {
+    return new Date(dateString).toLocaleDateString("fr-FR");
+  }
+
+  function getTypeLabel(type) {
+    const types = {
+      depot: "Dépôt",
+      retrait: "Retrait",
+      virement: "Virement",
+    };
+    return types[type] || type;
+  }
+
+  function getTypeBadge(type) {
+    return `<span class="transaction-type type-${type}">${getTypeLabel(
+      type
+    )}</span>`;
+  }
+
+  function renderTransactions() {
+    const tbody = document.getElementById("transactionsTableBody");
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const pageTransactions = filteredTransactions.slice(start, end);
+
+    tbody.innerHTML = pageTransactions
+      .map((transaction) => {
+        const amountClass =
+          transaction.amount >= 0 ? "amount positive" : "amount negative";
+        return `
+                    <tr>
+                        <td>${formatDate(transaction.date)}</td>
+                        <td>${getTypeBadge(transaction.type)}</td>
+                        <td>${transaction.client}</td>
+                        <td>${transaction.account}</td>
+                        <td class="${amountClass}">${formatCurrency(
+          transaction.amount
+        )}</td>
+                        <td>${transaction.description}</td>
+                        <td class="amount positive">${formatCurrency(
+                          transaction.balanceAfter
+                        )}</td>
+                    </tr>
+                `;
+      })
+      .join("");
+
+    renderPagination();
+  }
+
+  function renderPagination() {
+    const pagination = document.getElementById("pagination");
+    const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+
+    if (totalPages <= 1) {
+      pagination.innerHTML = "";
+      return;
+    }
+
+    let paginationHTML = `
+                <button ${
+                  currentPage === 1 ? "disabled" : ""
+                } onclick="changePage(${currentPage - 1})">
+                    Précédent
+                </button>
+            `;
+
+    for (let i = 1; i <= totalPages; i++) {
+      if (
+        i === 1 ||
+        i === totalPages ||
+        (i >= currentPage - 2 && i <= currentPage + 2)
+      ) {
+        paginationHTML += `
+                        <button class="${
+                          i === currentPage ? "active" : ""
+                        }" onclick="changePage(${i})">
+                            ${i}
+                        </button>
+                    `;
+      } else if (i === currentPage - 3 || i === currentPage + 3) {
+        paginationHTML += "<span>...</span>";
+      }
+    }
+
+    paginationHTML += `
+                <button ${
+                  currentPage === totalPages ? "disabled" : ""
+                } onclick="changePage(${currentPage + 1})">
+                    Suivant
+                </button>
+            `;
+
+    pagination.innerHTML = paginationHTML;
+  }
+
+  function changePage(page) {
+    const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+    if (page >= 1 && page <= totalPages) {
+      currentPage = page;
+      renderTransactions();
+    }
+  }
+
+  function applyFilters() {
+    const startDate = document.getElementById("startDate").value;
+    const endDate = document.getElementById("endDate").value;
+    const typeFilter = document.getElementById("typeFilter").value;
+    const clientFilter = document
+      .getElementById("clientFilter")
+      .value.toLowerCase();
+    const minAmount =
+      parseFloat(document.getElementById("minAmount").value) || -Infinity;
+    const maxAmount =
+      parseFloat(document.getElementById("maxAmount").value) || Infinity;
+
+    filteredTransactions = allTransactions.filter((transaction) => {
+      const transactionDate = new Date(transaction.date);
+      const matchesDateRange =
+        (!startDate || transactionDate >= new Date(startDate)) &&
+        (!endDate || transactionDate <= new Date(endDate));
+      const matchesType = !typeFilter || transaction.type === typeFilter;
+      const matchesClient =
+        !clientFilter ||
+        transaction.client.toLowerCase().includes(clientFilter);
+      const matchesAmount =
+        Math.abs(transaction.amount) >= minAmount &&
+        Math.abs(transaction.amount) <= maxAmount;
+
+      return matchesDateRange && matchesType && matchesClient && matchesAmount;
+    });
+
+    currentPage = 1;
+    renderTransactions();
+    updateStats();
+  }
+
+  function updateStats() {
+    const totalTransactions = filteredTransactions.length;
+    const deposits = filteredTransactions.filter((t) => t.amount > 0);
+    const withdrawals = filteredTransactions.filter((t) => t.amount < 0);
+
+    const totalDeposits = deposits.reduce((sum, t) => sum + t.amount, 0);
+    const totalWithdrawals = withdrawals.reduce(
+      (sum, t) => sum + Math.abs(t.amount),
+      0
+    );
+    const netBalance = totalDeposits - totalWithdrawals;
+
+    document.getElementById("totalTransactions").textContent =
+      totalTransactions.toLocaleString("fr-FR");
+    document.getElementById("totalDeposits").textContent =
+      formatCurrency(totalDeposits);
+    document.getElementById("totalWithdrawals").textContent = formatCurrency(
+      -totalWithdrawals
+    );
+    document.getElementById("netBalance").textContent =
+      formatCurrency(netBalance);
+
+    // Mise à jour des classes CSS pour les couleurs
+    document.getElementById("netBalance").className =
+      netBalance >= 0 ? "stat-value positive" : "stat-value negative";
+  }
+
+  // Event listeners pour les filtres
+  document.getElementById("startDate").addEventListener("change", applyFilters);
+  document.getElementById("endDate").addEventListener("change", applyFilters);
+  document
+    .getElementById("typeFilter")
+    .addEventListener("change", applyFilters);
+  document
+    .getElementById("clientFilter")
+    .addEventListener("input", applyFilters);
+  document.getElementById("minAmount").addEventListener("input", applyFilters);
+  document.getElementById("maxAmount").addEventListener("input", applyFilters);
+
+  // Initialiser les dates par défaut (dernier mois)
+  const today = new Date();
+  const lastMonth = new Date(
+    today.getFullYear(),
+    today.getMonth() - 1,
+    today.getDate()
+  );
+  document.getElementById("startDate").value = lastMonth
+    .toISOString()
+    .split("T")[0];
+  document.getElementById("endDate").value = today.toISOString().split("T")[0];
+
+  // Rendu initial
+  renderTransactions();
+  updateStats();
+</script>
+{%endblock%}

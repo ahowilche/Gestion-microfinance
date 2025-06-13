@@ -1,0 +1,885 @@
+{%extends "../home.html"%} {%block content%}
+
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      sans-serif;
+    background-color: #f8fafc;
+    color: #1e293b;
+    line-height: 1.6;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .page-inner {
+    space-y: 1.5rem;
+  }
+
+  .welcome-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .welcome-section h2 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+  }
+
+  .welcome-section p {
+    color: #64748b;
+    margin-bottom: 1rem;
+  }
+
+  .card {
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+
+  .table-container {
+    overflow-x: auto;
+  }
+
+  .client-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .client-table th {
+    text-align: left;
+    padding: 1rem;
+    font-weight: 500;
+    color: #64748b;
+    border-bottom: 1px solid #e2e8f0;
+    background-color: #f8fafc;
+  }
+
+  .client-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    font-weight: 500;
+  }
+
+  .client-table tr:hover {
+    background-color: #f8fafc;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.625rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background-color: #f1f5f9;
+    color: #475569;
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .btn-action {
+    padding: 0.5rem;
+    border: none;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: transparent;
+    font-size: 1rem;
+  }
+
+  .btn-action:hover {
+    transform: scale(1.1);
+  }
+
+  .btn-action.edit:hover {
+    background-color: #dbeafe;
+  }
+
+  .btn-action.account:hover {
+    background-color: #dcfce7;
+  }
+
+  .btn-action.delete:hover {
+    background-color: #fee2e2;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-primary {
+    background-color: #1e293b;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background-color: #334155;
+  }
+
+  .btn-outline {
+    background-color: transparent;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+  }
+
+  .btn-outline:hover {
+    background-color: #f8fafc;
+  }
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    text-align: center;
+  }
+
+  .empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+  }
+
+  .empty-state h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .empty-state p {
+    color: #64748b;
+    margin-bottom: 1rem;
+  }
+
+  /* Modal styles - Taille très réduite */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+  }
+
+  .modal.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-content {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    width: 90%;
+    max-width: 500px; /* Réduit de 500px à 350px */
+    max-height: 80vh; /* Réduit de 90vh à 80vh */
+    overflow-y: auto;
+    animation: modalSlideIn 0.3s ease-out;
+  }
+
+  /* Classe pour les modals encore plus petits */
+  .modal-small {
+    max-width: 320px; /* Réduit de 400px à 320px */
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1rem 0 1rem; /* Réduit le padding */
+    border-bottom: 1px solid #e2e8f0;
+    margin-bottom: 0.75rem; /* Réduit la marge */
+  }
+
+  .modal-header h2 {
+    font-size: 1.125rem; /* Réduit de 1.25rem à 1.125rem */
+    font-weight: 600;
+    color: #1e293b;
+  }
+
+  .modal-form {
+    padding: 0 1rem 1rem 1rem; /* Réduit le padding horizontal */
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem; /* Réduit l'espacement entre les éléments */
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem; /* Réduit l'espacement label-input */
+  }
+
+  .form-group label {
+    font-size: 0.8125rem; /* Légèrement plus petit */
+    font-weight: 500;
+    color: #374151;
+  }
+
+  .form-group input,
+  .form-group select {
+    padding: 0.5rem; /* Réduit le padding des champs */
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    font-size: 0.8125rem; /* Légèrement plus petit */
+    transition: all 0.2s;
+    height: 2.25rem; /* Hauteur fixe plus petite */
+  }
+
+  .client-info {
+    background-color: #f8fafc;
+    padding: 0.5rem 1rem; /* Réduit le padding */
+    border-radius: 0.5rem;
+    margin: 0 1rem 0.75rem 1rem; /* Réduit les marges */
+  }
+
+  .client-info p {
+    font-size: 0.8125rem;
+    color: #374151;
+  }
+
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem; /* Réduit l'espacement des boutons */
+    padding-top: 0.75rem; /* Réduit le padding */
+    border-top: 1px solid #e2e8f0;
+    margin-top: 0.75rem; /* Réduit la marge */
+  }
+
+  .modal-actions .btn {
+    padding: 0.375rem 0.75rem; /* Boutons plus petits */
+    font-size: 0.8125rem;
+  }
+
+  /* Responsive design amélioré */
+  @media (max-width: 768px) {
+    .modal-content {
+      margin: 0.75rem;
+      width: calc(100% - 1.5rem);
+      max-width: none;
+    }
+
+    .modal-small {
+      max-width: none;
+    }
+
+    .form-row {
+      grid-template-columns: 1fr; /* Une colonne sur mobile */
+      gap: 0.5rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .modal-content {
+      margin: 0.5rem;
+      width: calc(100% - 1rem);
+    }
+
+    .modal-header {
+      padding: 0.75rem 0.75rem 0 0.75rem;
+    }
+
+    .modal-form {
+      padding: 0 0.75rem 0.75rem 0.75rem;
+    }
+
+    .client-info {
+      margin: 0 0.75rem 0.5rem 0.75rem;
+    }
+  }
+
+  .client-info p {
+    font-size: 0.875rem;
+    color: #374151;
+  }
+
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+    margin-top: 1rem;
+  }
+
+  /* Toast styles */
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background-color: #10b981;
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    transform: translateX(100%);
+    transition: transform 0.3s ease-out;
+    z-index: 1100;
+  }
+
+  .toast.show {
+    transform: translateX(0);
+  }
+
+  .toast.error {
+    background-color: #ef4444;
+  }
+
+  /* Responsive design */
+  @media (max-width: 768px) {
+    .container {
+      padding: 1rem;
+    }
+
+    .welcome-section {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+
+    .modal-content {
+      margin: 1rem;
+      width: calc(100% - 2rem);
+    }
+
+    .modal-small {
+      max-width: none; /* Enlève la limite sur mobile */
+    }
+
+    .client-table th,
+    .client-table td {
+      padding: 0.5rem;
+      font-size: 0.875rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .actions {
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .btn-action {
+      padding: 0.25rem;
+      font-size: 0.875rem;
+    }
+  }
+</style>
+
+<div class="container">
+  <div class="page-inner">
+    <section class="welcome-section">
+      <h2>Liste des clients</h2>
+      <button
+        class="btn btn-primary"
+        onclick="window.location.href='formulaire-client.html'"
+      >
+        <span class="icon">➕</span>
+        Ajouter un client
+      </button>
+    </section>
+
+    <div class="card">
+      <div class="table-container">
+        <table class="client-table">
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Prénom</th>
+              <th>Téléphone</th>
+              <th>Adresse</th>
+              <th>N° Identifiant</th>
+              <th>Date d'inscription</th>
+              <th>Comptes</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="clientTableBody">
+            <!-- Les lignes seront générées par JavaScript -->
+          </tbody>
+        </table>
+      </div>
+
+      <div id="emptyState" class="empty-state" style="display: none">
+        <div class="empty-icon">👥</div>
+        <h3>Aucun client</h3>
+        <p>Commencez par ajouter votre premier client.</p>
+        <button
+          class="btn btn-primary"
+          onclick="window.location.href='formulaire-client.html'"
+        >
+          <span class="icon">➕</span>
+          Ajouter un client
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Modifier Client - Taille réduite -->
+  <div id="editClientModal" class="modal">
+    <div class="modal-content modal-small">
+      <div class="modal-header">
+        <h2>Modifier le client</h2>
+        <span class="close" onclick="closeModal('editClientModal')"
+          >&times;</span
+        >
+      </div>
+      <form id="editClientForm" class="modal-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="editNom">Nom *</label>
+            <input type="text" id="editNom" name="nom" required />
+          </div>
+          <div class="form-group">
+            <label for="editPrenom">Prénom *</label>
+            <input type="text" id="editPrenom" name="prenom" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="editTelephone">Téléphone *</label>
+          <input type="tel" id="editTelephone" name="telephone" required />
+        </div>
+        <div class="form-group">
+          <label for="editAdresse">Adresse *</label>
+          <input type="text" id="editAdresse" name="adresse" required />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="editNumeroIdentifiant">N° Identifiant *</label>
+            <input
+              type="text"
+              id="editNumeroIdentifiant"
+              name="numeroIdentifiant"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="editDateInscription">Date d'inscription *</label>
+            <input
+              type="date"
+              id="editDateInscription"
+              name="dateInscription"
+              required
+            />
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button
+            type="button"
+            class="btn btn-outline"
+            onclick="closeModal('editClientModal')"
+          >
+            Annuler
+          </button>
+          <button type="submit" class="btn btn-primary">
+            <span class="icon">💾</span>
+            Sauvegarder
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Ajouter Compte - Taille réduite -->
+  <div id="addAccountModal" class="modal">
+    <div class="modal-content modal-small">
+      <div class="modal-header">
+        <h2>Ajouter un compte</h2>
+        <span class="close" onclick="closeModal('addAccountModal')"
+          >&times;</span
+        >
+      </div>
+      <div class="client-info">
+        <p>Client: <span id="selectedClientName"></span></p>
+      </div>
+      <form id="addAccountForm" class="modal-form">
+        <div class="form-group">
+          <label for="numeroCompte">Numéro de compte *</label>
+          <input
+            type="text"
+            id="numeroCompte"
+            name="numeroCompte"
+            placeholder="Ex: 123456789"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="typeCompte">Type de compte *</label>
+          <select id="typeCompte" name="typeCompte" required>
+            <option value="">Sélectionner un type</option>
+            <option value="Compte courant">Compte courant</option>
+            <option value="Épargne">Épargne</option>
+            <option value="Livret A">Livret A</option>
+            <option value="PEL">PEL</option>
+            <option value="Assurance vie">Assurance vie</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="soldeInitial">Solde initial (€) *</label>
+          <input
+            type="number"
+            id="soldeInitial"
+            name="soldeInitial"
+            step="0.01"
+            min="0"
+            placeholder="0.00"
+            required
+          />
+        </div>
+        <div class="modal-actions">
+          <button
+            type="button"
+            class="btn btn-outline"
+            onclick="closeModal('addAccountModal')"
+          >
+            Annuler
+          </button>
+          <button type="submit" class="btn btn-primary">Créer le compte</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">
+    <span id="toastMessage"></span>
+  </div>
+</div>
+
+<script>
+  // Données des clients (simulé localStorage)
+  let clients = [
+    {
+      id: "1",
+      nom: "Dupont",
+      prenom: "Jean",
+      telephone: "0123456789",
+      adresse: "123 Rue de la Paix, Paris",
+      numeroIdentifiant: "ID001",
+      dateInscription: "2024-01-15",
+      comptes: [
+        {
+          id: "1",
+          numeroCompte: "123456789",
+          typeCompte: "Compte courant",
+          solde: 1500.5,
+        },
+        {
+          id: "2",
+          numeroCompte: "987654321",
+          typeCompte: "Épargne",
+          solde: 5000.0,
+        },
+      ],
+    },
+    {
+      id: "2",
+      nom: "Martin",
+      prenom: "Marie",
+      telephone: "0987654321",
+      adresse: "456 Avenue des Champs, Lyon",
+      numeroIdentifiant: "ID002",
+      dateInscription: "2024-02-20",
+      comptes: [
+        {
+          id: "3",
+          numeroCompte: "555666777",
+          typeCompte: "Compte courant",
+          solde: 2300.75,
+        },
+      ],
+    },
+  ];
+
+  // Variables globales
+  let currentEditingClientId = null;
+  let currentAddAccountClientId = null;
+
+  // Charger les clients depuis localStorage
+  function loadClients() {
+    const savedClients = localStorage.getItem("clients");
+    if (savedClients) {
+      clients = JSON.parse(savedClients);
+    }
+  }
+
+  // Sauvegarder les clients dans localStorage
+  function saveClients() {
+    localStorage.setItem("clients", JSON.stringify(clients));
+  }
+
+  // Formater la date
+  function formatDate(dateString) {
+    return new Date(dateString).toLocaleDateString("fr-FR");
+  }
+
+  // Afficher le toast
+  function showToast(message, isError = false) {
+    const toast = document.getElementById("toast");
+    const toastMessage = document.getElementById("toastMessage");
+
+    toastMessage.textContent = message;
+    toast.className = isError ? "toast error show" : "toast show";
+
+    setTimeout(() => {
+      toast.classList.remove("show");
+    }, 3000);
+  }
+
+  // Rendre la liste des clients
+  function renderClients() {
+    const tbody = document.getElementById("clientTableBody");
+    const emptyState = document.getElementById("emptyState");
+
+    if (clients.length === 0) {
+      tbody.innerHTML = "";
+      emptyState.style.display = "block";
+      return;
+    }
+
+    emptyState.style.display = "none";
+
+    tbody.innerHTML = clients
+      .map(
+        (client) => `
+            <tr>
+                <td>${client.nom}</td>
+                <td>${client.prenom}</td>
+                <td>${client.telephone}</td>
+                <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${
+                  client.adresse
+                }">
+                    ${client.adresse}
+                </td>
+                <td>${client.numeroIdentifiant}</td>
+                <td>${formatDate(client.dateInscription)}</td>
+                <td>
+                    <span class="badge">
+                        ${client.comptes.length} compte${
+          client.comptes.length > 1 ? "s" : ""
+        }
+                    </span>
+                </td>
+                <td>
+                    <div class="actions">
+                        <button class="btn-action edit" onclick="editClient('${
+                          client.id
+                        }')" title="Modifier">
+                            ✏️
+                        </button>
+                        <button class="btn-action account" onclick="addAccount('${
+                          client.id
+                        }')" title="Ajouter un compte">
+                            💳
+                        </button>
+                        <button class="btn-action delete" onclick="deleteClient('${
+                          client.id
+                        }', '${client.nom}', '${
+          client.prenom
+        }')" title="Supprimer">
+                            🗑️
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `
+      )
+      .join("");
+  }
+
+  // Modifier un client
+  function editClient(clientId) {
+    const client = clients.find((c) => c.id === clientId);
+    if (!client) return;
+
+    currentEditingClientId = clientId;
+
+    // Remplir le formulaire
+    document.getElementById("editNom").value = client.nom;
+    document.getElementById("editPrenom").value = client.prenom;
+    document.getElementById("editTelephone").value = client.telephone;
+    document.getElementById("editAdresse").value = client.adresse;
+    document.getElementById("editNumeroIdentifiant").value =
+      client.numeroIdentifiant;
+    document.getElementById("editDateInscription").value =
+      client.dateInscription;
+
+    // Afficher le modal
+    document.getElementById("editClientModal").classList.add("show");
+  }
+
+  // Supprimer un client
+  function deleteClient(clientId, nom, prenom) {
+    if (
+      confirm(`Êtes-vous sûr de vouloir supprimer le client ${prenom} ${nom} ?`)
+    ) {
+      clients = clients.filter((c) => c.id !== clientId);
+      saveClients();
+      renderClients();
+      showToast(`${prenom} ${nom} a été supprimé avec succès.`);
+    }
+  }
+
+  // Ajouter un compte
+  function addAccount(clientId) {
+    const client = clients.find((c) => c.id === clientId);
+    if (!client) return;
+
+    currentAddAccountClientId = clientId;
+    document.getElementById(
+      "selectedClientName"
+    ).textContent = `${client.prenom} ${client.nom}`;
+    document.getElementById("addAccountModal").classList.add("show");
+  }
+
+  // Fermer un modal
+  function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove("show");
+
+    // Reset forms
+    if (modalId === "editClientModal") {
+      document.getElementById("editClientForm").reset();
+      currentEditingClientId = null;
+    } else if (modalId === "addAccountModal") {
+      document.getElementById("addAccountForm").reset();
+      currentAddAccountClientId = null;
+    }
+  }
+
+  // Gérer la soumission du formulaire d'édition
+  function handleEditSubmit(event) {
+    event.preventDefault();
+
+    if (!currentEditingClientId) return;
+
+    const formData = new FormData(event.target);
+    const clientIndex = clients.findIndex(
+      (c) => c.id === currentEditingClientId
+    );
+
+    if (clientIndex === -1) return;
+
+    // Mettre à jour le client
+    clients[clientIndex] = {
+      ...clients[clientIndex],
+      nom: formData.get("nom"),
+      prenom: formData.get("prenom"),
+      telephone: formData.get("telephone"),
+      adresse: formData.get("adresse"),
+      numeroIdentifiant: formData.get("numeroIdentifiant"),
+      dateInscription: formData.get("dateInscription"),
+    };
+
+    saveClients();
+    renderClients();
+    closeModal("editClientModal");
+    showToast(
+      `${clients[clientIndex].prenom} ${clients[clientIndex].nom} a été modifié avec succès.`
+    );
+  }
+
+  // Gérer la soumission du formulaire d'ajout de compte
+  function handleAddAccountSubmit(event) {
+    event.preventDefault();
+
+    if (!currentAddAccountClientId) return;
+
+    const formData = new FormData(event.target);
+    const clientIndex = clients.findIndex(
+      (c) => c.id === currentAddAccountClientId
+    );
+
+    if (clientIndex === -1) return;
+
+    const newAccount = {
+      id: Date.now().toString(),
+      numeroCompte: formData.get("numeroCompte"),
+      typeCompte: formData.get("typeCompte"),
+      solde: parseFloat(formData.get("soldeInitial")) || 0,
+    };
+
+    clients[clientIndex].comptes.push(newAccount);
+
+    saveClients();
+    renderClients();
+    closeModal("addAccountModal");
+    showToast(`Le compte ${newAccount.numeroCompte} a été ajouté avec succès.`);
+  }
+
+  // Fermer les modals en cliquant en dehors
+  function handleModalClick(event) {
+    if (event.target.classList.contains("modal")) {
+      closeModal(event.target.id);
+    }
+  }
+
+  // Initialisation
+  document.addEventListener("DOMContentLoaded", function () {
+    loadClients();
+    renderClients();
+
+    // Event listeners
+    document
+      .getElementById("editClientForm")
+      .addEventListener("submit", handleEditSubmit);
+    document
+      .getElementById("addAccountForm")
+      .addEventListener("submit", handleAddAccountSubmit);
+
+    // Fermer les modals en cliquant en dehors
+    document
+      .getElementById("editClientModal")
+      .addEventListener("click", handleModalClick);
+    document
+      .getElementById("addAccountModal")
+      .addEventListener("click", handleModalClick);
+
+    // Fermer les modals avec Escape
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") {
+        closeModal("editClientModal");
+        closeModal("addAccountModal");
+      }
+    });
+  });
+</script>
+{%endblock%}

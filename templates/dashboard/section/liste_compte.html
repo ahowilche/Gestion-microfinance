@@ -1,0 +1,616 @@
+{%extends "../home.html"%} {%block content%}
+<style>
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+    background-color: #f9fafb;
+    min-height: 100vh;
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+  }
+
+  .header-info {
+    color: #6b7280;
+    font-size: 14px;
+    margin-top: 4px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-primary {
+    background-color: #2563eb;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background-color: #1d4ed8;
+  }
+
+  .btn-outline {
+    border: 1px solid #d1d5db;
+    background: white;
+    color: #374151;
+  }
+
+  .btn-outline:hover {
+    background-color: #f9fafb;
+  }
+
+  .btn-sm {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 24px;
+  }
+
+  .search-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .search-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .search-box {
+    position: relative;
+    flex: 1;
+    min-width: 250px;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 10px 12px 10px 40px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    background: white;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6b7280;
+    width: 16px;
+    height: 16px;
+  }
+
+  .filter-select {
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    background: white;
+    min-width: 180px;
+  }
+
+  .table-container {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+  }
+
+  .accounts-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  .accounts-table th {
+    background-color: #f9fafb;
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 500;
+    color: #6b7280;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .accounts-table th.text-right {
+    text-align: right;
+  }
+
+  .accounts-table td {
+    padding: 16px;
+    border-bottom: 1px solid #f3f4f6;
+    vertical-align: middle;
+  }
+
+  .accounts-table td.text-right {
+    text-align: right;
+  }
+
+  .accounts-table tr:hover {
+    background-color: #f9fafb;
+  }
+
+  .accounts-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .account-number {
+    font-weight: 600;
+    color: #111827;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .badge-courant {
+    background-color: #dbeafe;
+    color: #1e40af;
+  }
+
+  .badge-epargne {
+    background-color: #dcfce7;
+    color: #166534;
+  }
+
+  .balance {
+    font-weight: 600;
+    color: #111827;
+  }
+
+  .balance.negative {
+    color: #dc2626;
+  }
+
+  .amount-positive {
+    color: #059669;
+    font-weight: 500;
+  }
+
+  .amount-negative {
+    color: #dc2626;
+    font-weight: 500;
+  }
+
+  .actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: #6b7280;
+  }
+
+  @media (max-width: 768px) {
+    .container {
+      padding: 16px;
+    }
+
+    .header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .search-row {
+      flex-direction: column;
+    }
+
+    .search-box {
+      min-width: 100%;
+    }
+
+    .filter-select {
+      width: 100%;
+    }
+
+    .actions {
+      flex-direction: column;
+    }
+
+    .btn-sm {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>
+
+<div class="container">
+  <div class="page-inner">
+    <div class="header">
+      <div>
+        <h1>Liste des Comptes</h1>
+        <p class="header-info">6 comptes • Solde total: 72 095,73 €</p>
+      </div>
+      <a href="/accounts/add" class="btn btn-primary">
+        <svg
+          width="16"
+          height="16"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 4v16m8-8H4"
+          ></path>
+        </svg>
+        Ouvrir un compte
+      </a>
+    </div>
+
+    <h2 class="section-title">Comptes clients</h2>
+
+    <div class="search-filters">
+      <div class="search-row">
+        <div class="search-box">
+          <svg
+            class="search-icon"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            ></path>
+          </svg>
+          <input
+            type="text"
+            id="searchInput"
+            class="search-input"
+            placeholder="Rechercher un compte..."
+          />
+        </div>
+
+        <select id="typeFilter" class="filter-select">
+          <option value="">Tous les types</option>
+          <option value="courant">Courant</option>
+          <option value="epargne">Épargne</option>
+        </select>
+
+        <select id="statusFilter" class="filter-select">
+          <option value="">Tous les statuts</option>
+          <option value="positive">Solde positif</option>
+          <option value="negative">Solde négatif</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <div class="table-wrapper">
+        <table class="accounts-table">
+          <thead>
+            <tr>
+              <th>Numéro de compte</th>
+              <th>Client</th>
+              <th>ID Client</th>
+              <th>Type</th>
+              <th class="text-right">Solde</th>
+              <th class="text-right">Total dépôts</th>
+              <th class="text-right">Total retraits</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="accountsTableBody">
+            <tr>
+              <td class="account-number">ACC1234567890</td>
+              <td>Jean Dupont</td>
+              <td>CLI001</td>
+              <td>
+                <span class="badge badge-courant">Courant</span>
+              </td>
+              <td class="text-right balance">15 247,50 €</td>
+              <td class="text-right amount-positive">25 430,75 €</td>
+              <td class="text-right amount-negative">10 183,25 €</td>
+              <td>
+                <div class="actions">
+                  <button class="btn btn-outline btn-sm">Détails</button>
+                  <button class="btn btn-outline btn-sm">Dépôt</button>
+                  <button class="btn btn-outline btn-sm">Retrait</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="account-number">ACC1234567891</td>
+              <td>Marie Martin</td>
+              <td>CLI002</td>
+              <td>
+                <span class="badge badge-epargne">Épargne</span>
+              </td>
+              <td class="text-right balance">8 956,25 €</td>
+              <td class="text-right amount-positive">12 000,00 €</td>
+              <td class="text-right amount-negative">3 043,75 €</td>
+              <td>
+                <div class="actions">
+                  <button class="btn btn-outline btn-sm">Détails</button>
+                  <button class="btn btn-outline btn-sm">Dépôt</button>
+                  <button class="btn btn-outline btn-sm">Retrait</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="account-number">ACC1234567892</td>
+              <td>Pierre Durand</td>
+              <td>CLI003</td>
+              <td>
+                <span class="badge badge-courant">Courant</span>
+              </td>
+              <td class="text-right balance negative">-150,00 €</td>
+              <td class="text-right amount-positive">8 750,00 €</td>
+              <td class="text-right amount-negative">8 900,00 €</td>
+              <td>
+                <div class="actions">
+                  <button class="btn btn-outline btn-sm">Détails</button>
+                  <button class="btn btn-outline btn-sm">Dépôt</button>
+                  <button class="btn btn-outline btn-sm">Retrait</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="account-number">ACC1234567893</td>
+              <td>Sophie Leblanc</td>
+              <td>CLI004</td>
+              <td>
+                <span class="badge badge-epargne">Épargne</span>
+              </td>
+              <td class="text-right balance">23 478,90 €</td>
+              <td class="text-right amount-positive">28 000,00 €</td>
+              <td class="text-right amount-negative">4 521,10 €</td>
+              <td>
+                <div class="actions">
+                  <button class="btn btn-outline btn-sm">Détails</button>
+                  <button class="btn btn-outline btn-sm">Dépôt</button>
+                  <button class="btn btn-outline btn-sm">Retrait</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="account-number">ACC1234567894</td>
+              <td>Antoine Moreau</td>
+              <td>CLI005</td>
+              <td>
+                <span class="badge badge-courant">Courant</span>
+              </td>
+              <td class="text-right balance">5 642,33 €</td>
+              <td class="text-right amount-positive">15 230,50 €</td>
+              <td class="text-right amount-negative">9 588,17 €</td>
+              <td>
+                <div class="actions">
+                  <button class="btn btn-outline btn-sm">Détails</button>
+                  <button class="btn btn-outline btn-sm">Dépôt</button>
+                  <button class="btn btn-outline btn-sm">Retrait</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="account-number">ACC1234567895</td>
+              <td>Caroline Petit</td>
+              <td>CLI006</td>
+              <td>
+                <span class="badge badge-epargne">Épargne</span>
+              </td>
+              <td class="text-right balance">18 920,75 €</td>
+              <td class="text-right amount-positive">22 000,00 €</td>
+              <td class="text-right amount-negative">3 079,25 €</td>
+              <td>
+                <div class="actions">
+                  <button class="btn btn-outline btn-sm">Détails</button>
+                  <button class="btn btn-outline btn-sm">Dépôt</button>
+                  <button class="btn btn-outline btn-sm">Retrait</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Données des comptes avec toutes les informations
+  const accounts = [
+    {
+      accountNumber: "ACC1234567890",
+      clientName: "Jean Dupont",
+      clientId: "CLI001",
+      accountType: "courant",
+      balance: 15247.5,
+      totalDeposits: 25430.75,
+      totalWithdrawals: 10183.25,
+    },
+    {
+      accountNumber: "ACC1234567891",
+      clientName: "Marie Martin",
+      clientId: "CLI002",
+      accountType: "epargne",
+      balance: 8956.25,
+      totalDeposits: 12000.0,
+      totalWithdrawals: 3043.75,
+    },
+    {
+      accountNumber: "ACC1234567892",
+      clientName: "Pierre Durand",
+      clientId: "CLI003",
+      accountType: "courant",
+      balance: -150.0,
+      totalDeposits: 8750.0,
+      totalWithdrawals: 8900.0,
+    },
+    {
+      accountNumber: "ACC1234567893",
+      clientName: "Sophie Leblanc",
+      clientId: "CLI004",
+      accountType: "epargne",
+      balance: 23478.9,
+      totalDeposits: 28000.0,
+      totalWithdrawals: 4521.1,
+    },
+    {
+      accountNumber: "ACC1234567894",
+      clientName: "Antoine Moreau",
+      clientId: "CLI005",
+      accountType: "courant",
+      balance: 5642.33,
+      totalDeposits: 15230.5,
+      totalWithdrawals: 9588.17,
+    },
+    {
+      accountNumber: "ACC1234567895",
+      clientName: "Caroline Petit",
+      clientId: "CLI006",
+      accountType: "epargne",
+      balance: 18920.75,
+      totalDeposits: 22000.0,
+      totalWithdrawals: 3079.25,
+    },
+  ];
+
+  function formatCurrency(amount) {
+    return new Intl.NumberFormat("fr-FR", {
+      style: "currency",
+      currency: "EUR",
+    }).format(amount);
+  }
+
+  function createTableRow(account) {
+    const balanceClass = account.balance < 0 ? "balance negative" : "balance";
+    const badgeClass =
+      account.accountType === "courant" ? "badge-courant" : "badge-epargne";
+    const typeName = account.accountType === "courant" ? "Courant" : "Épargne";
+
+    return `
+      <tr>
+        <td class="account-number">${account.accountNumber}</td>
+        <td>${account.clientName}</td>
+        <td>${account.clientId}</td>
+        <td>
+          <span class="badge ${badgeClass}">${typeName}</span>
+        </td>
+        <td class="text-right ${balanceClass}">${formatCurrency(
+      account.balance
+    )}</td>
+        <td class="text-right amount-positive">${formatCurrency(
+          account.totalDeposits
+        )}</td>
+        <td class="text-right amount-negative">${formatCurrency(
+          account.totalWithdrawals
+        )}</td>
+        <td>
+          <div class="actions">
+            <button class="btn btn-outline btn-sm">Détails</button>
+            <button class="btn btn-outline btn-sm">Dépôt</button>
+            <button class="btn btn-outline btn-sm">Retrait</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }
+
+  function renderAccounts(accountsToRender = accounts) {
+    const tableBody = document.getElementById("accountsTableBody");
+    if (accountsToRender.length === 0) {
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="8" class="empty-state">
+            Aucun compte trouvé avec ces critères de recherche.
+          </td>
+        </tr>
+      `;
+    } else {
+      tableBody.innerHTML = accountsToRender.map(createTableRow).join("");
+    }
+  }
+
+  function filterAccounts() {
+    const searchTerm = document
+      .getElementById("searchInput")
+      .value.toLowerCase();
+    const typeFilter = document.getElementById("typeFilter").value;
+    const statusFilter = document.getElementById("statusFilter").value;
+
+    const filtered = accounts.filter((account) => {
+      const matchesSearch =
+        account.clientName.toLowerCase().includes(searchTerm) ||
+        account.accountNumber.toLowerCase().includes(searchTerm) ||
+        account.clientId.toLowerCase().includes(searchTerm);
+
+      const matchesType = !typeFilter || account.accountType === typeFilter;
+
+      const matchesStatus =
+        !statusFilter ||
+        (statusFilter === "positive" && account.balance >= 0) ||
+        (statusFilter === "negative" && account.balance < 0);
+
+      return matchesSearch && matchesType && matchesStatus;
+    });
+
+    renderAccounts(filtered);
+  }
+
+  // Event listeners
+  document
+    .getElementById("searchInput")
+    .addEventListener("input", filterAccounts);
+  document
+    .getElementById("typeFilter")
+    .addEventListener("change", filterAccounts);
+  document
+    .getElementById("statusFilter")
+    .addEventListener("change", filterAccounts);
+
+  // Rendu initial
+  renderAccounts();
+</script>
+
+{%endblock content%}

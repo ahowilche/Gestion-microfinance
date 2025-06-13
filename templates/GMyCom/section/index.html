@@ -1,0 +1,61 @@
+{%extends "../master.html"%}
+{%block content%} 
+ <!-- Main Content -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <!-- Left Content -->
+                <div class="hero-text">
+                    <div class="text-content">
+                        <h1 class="hero-title">
+                            Bienvenue
+                            <span class="gradient-text">Agent GMyCom</span>
+                        </h1>
+                        <p class="hero-description">
+                            Accédez à votre espace de travail pour gérer vos clients et opérations de microfinance.
+                        </p>
+                    </div>
+                    <div class="button-container">
+                        <button class="work-button" onclick="handleStartWork()">
+                            Travailler
+                            <svg class="arrow-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M5 12h14"></path>
+                                <path d="m12 5 7 7-7 7"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right Illustration -->
+                <div class="hero-illustration">
+                    <div class="illustration-card">
+                        <div class="decoration decoration-1"></div>
+                        <div class="decoration decoration-2"></div>
+                        
+                        <div class="central-content">
+                            <div class="icon-circle">
+                                <svg class="users-icon" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="9" cy="7" r="4"></circle>
+                                    <path d="m22 21-2-2"></path>
+                                    <path d="m16 16-2-2"></path>
+                                    <circle cx="19" cy="13" r="3"></circle>
+                                </svg>
+                            </div>
+                            <div class="icon-text">
+                                <h3>Interface Agent</h3>
+                                <p>Gestion complète et intuitive</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <script>
+        function handleStartWork() {
+             // Redirection vers la page de connexion
+                window.location.href = "{% url 'login' %}";
+        }
+    </script>
+{%endblock%}
