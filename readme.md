@@ -56,19 +56,18 @@ Montant total épargné / total des crédits accordés
 
 🧱 Pages à créer dans le site (backend uniquement, agent/admin)
 
-| Page                         | Objectif                                      |
+Page et Objectif                                   
 
-| ---------------------------- | --------------------------------------------- |
-| Page de connexion            | Authentifier les agents                       |
-| Tableau de bord              | Vue synthétique des clients, comptes, crédits |
-| Liste des clients            | Gérer les clients                             |
-| Ajouter / modifier un client | Formulaires simples                           |
-| Liste des comptes            | Gérer les comptes par client                  |
-| Formulaire de dépôt/retrait  | Mouvements simples                            |
-| Liste des crédits            | Suivi des crédits                             |
-| Formulaire de crédit         | Enregistrement d’un nouveau crédit            |
-| Formulaire de remboursement  | Enregistrement d’un versement                 |
-| Rapport de situation         | Liste filtrable/exportable                    |
+Page de connexion : Authentifier les agents
+Tableau de bord : Vue synthétique des clients, comptes, crédits
+Liste des clients :  Gérer les clients
+Ajouter / modifier un client: Formulaires simples
+Liste des comptes : Gérer les comptes par client
+Formulaire de dépôt/retrait : Mouvements simples
+Liste des crédits : Suivi des crédits
+Formulaire de crédit : Enregistrement d’un nouveau crédit
+Formulaire de remboursement : Enregistrement d’un versement
+Rapport de situation : Liste filtrable/exportable
 
 🎁 Bonus possible (facultatif)
 
