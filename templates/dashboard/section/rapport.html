@@ -1,374 +1,496 @@
-{%extends "../home.html"%}
-{%load static%}
+{%extends "../home.html"%} {%load static%} {%block content%}
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
 
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      sans-serif;
+    background-color: #f9fafb;
+    color: #111827;
+    line-height: 1.6;
+  }
 
-{%block content%}
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+  }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #f9fafb;
-            color: #111827;
-            line-height: 1.6;
-        }
+  .header {
+    margin-bottom: 32px;
+  }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 24px;
-        }
+  .header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
 
-        .header {
-            margin-bottom: 32px;
-        }
+  .header p {
+    color: #6b7280;
+  }
 
-        .header h1 {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
+  .reports-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+  }
 
-        .header p {
-            color: #6b7280;
-        }
+  .report-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    padding: 24px;
+    transition: all 0.2s;
+  }
 
-        .reports-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 24px;
-            margin-bottom: 32px;
-        }
+  .report-card:hover {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
 
-        .report-card {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e5e7eb;
-            padding: 24px;
-            transition: all 0.2s;
-        }
+  .report-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
 
-        .report-card:hover {
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
+  .report-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
 
-        .report-icon {
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 16px;
-        }
+  .report-description {
+    color: #6b7280;
+    font-size: 14px;
+    margin-bottom: 16px;
+  }
 
-        .report-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
 
-        .report-description {
-            color: #6b7280;
-            font-size: 14px;
-            margin-bottom: 16px;
-        }
+  .btn-primary {
+    background-color: #2563eb;
+    color: white;
+  }
 
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 16px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 500;
-            text-decoration: none;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
+  .btn-primary:hover {
+    background-color: #1d4ed8;
+  }
 
-        .btn-primary {
-            background-color: #2563eb;
-            color: white;
-        }
+  .btn-outline {
+    border: 1px solid #d1d5db;
+    background: white;
+    color: #374151;
+  }
 
-        .btn-primary:hover {
-            background-color: #1d4ed8;
-        }
+  .btn-outline:hover {
+    background-color: #f9fafb;
+  }
 
-        .btn-outline {
-            border: 1px solid #d1d5db;
-            background: white;
-            color: #374151;
-        }
+  .card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+  }
 
-        .btn-outline:hover {
-            background-color: #f9fafb;
-        }
+  .card-header {
+    padding: 24px 24px 16px;
+    border-bottom: 1px solid #e5e7eb;
+  }
 
-        .card {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e5e7eb;
-        }
+  .card-title {
+    font-size: 18px;
+    font-weight: 600;
+  }
 
-        .card-header {
-            padding: 24px 24px 16px;
-            border-bottom: 1px solid #e5e7eb;
-        }
+  .card-content {
+    padding: 24px;
+  }
 
-        .card-title {
-            font-size: 18px;
-            font-weight: 600;
-        }
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
 
-        .card-content {
-            padding: 24px;
-        }
+  .summary-item {
+    text-align: center;
+    padding: 16px;
+    background: #f8fafc;
+    border-radius: 8px;
+  }
 
-        .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-        }
+  .summary-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #059669;
+    margin-bottom: 4px;
+  }
 
-        .summary-item {
-            text-align: center;
-            padding: 16px;
-            background: #f8fafc;
-            border-radius: 8px;
-        }
+  .summary-value.negative {
+    color: #dc2626;
+  }
 
-        .summary-value {
-            font-size: 24px;
-            font-weight: 700;
-            color: #059669;
-            margin-bottom: 4px;
-        }
+  .summary-label {
+    font-size: 14px;
+    color: #6b7280;
+  }
 
-        .summary-value.negative {
-            color: #dc2626;
-        }
+  .filters {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
 
-        .summary-label {
-            font-size: 14px;
-            color: #6b7280;
-        }
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
 
-        .filters {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-        }
+  .filter-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #374151;
+  }
 
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
+  .filter-select {
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    background: white;
+  }
 
-        .filter-label {
-            font-size: 12px;
-            font-weight: 500;
-            color: #374151;
-        }
+  .export-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+  }
 
-        .filter-select {
-            padding: 8px 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            font-size: 14px;
-            background: white;
-        }
+  @media (max-width: 768px) {
+    .container {
+      padding: 16px;
+    }
 
-        .export-actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 16px;
-        }
+    .reports-grid {
+      grid-template-columns: 1fr;
+    }
 
-        @media (max-width: 768px) {
-            .container {
-                padding: 16px;
-            }
+    .filters {
+      flex-direction: column;
+    }
 
-            .reports-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .filters {
-                flex-direction: column;
-            }
-
-            .summary-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-    </style>
-    <div class="container">
-        <div class="header">
-            <h1>Rapports</h1>
-            <p>Générez et consultez vos rapports financiers</p>
-        </div>
-
-        <!-- Cartes de rapports -->
-        <div class="reports-grid">
-            <div class="report-card">
-                <div class="report-icon">
-                    <svg width="24" height="24" fill="white" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                    </svg>
-                </div>
-                <h3 class="report-title">Rapport Clients</h3>
-                <p class="report-description">Liste complète des clients avec leurs informations et statistiques de comptes</p>
-                <button class="btn btn-primary" onclick="generateReport('clients')">
-                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                    Générer
-                </button>
-            </div>
-
-            <div class="report-card">
-                <div class="report-icon">
-                    <svg width="24" height="24" fill="white" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                    </svg>
-                </div>
-                <h3 class="report-title">Rapport Transactions</h3>
-                <p class="report-description">Historique détaillé de toutes les transactions avec filtres par période</p>
-                <button class="btn btn-primary" onclick="generateReport('transactions')">
-                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                    Générer
-                </button>
-            </div>
-
-            <div class="report-card">
-                <div class="report-icon">
-                    <svg width="24" height="24" fill="white" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                    </svg>
-                </div>
-                <h3 class="report-title">Rapport Crédits</h3>
-                <p class="report-description">Suivi des crédits en cours, remboursements et performances</p>
-                <button class="btn btn-primary" onclick="generateReport('credits')">
-                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                    Générer
-                </button>
-            </div>
-
-            <div class="report-card">
-                <div class="report-icon">
-                    <svg width="24" height="24" fill="white" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
-                </div>
-                <h3 class="report-title">Résumé Financier</h3>
-                <p class="report-description">Vue d'ensemble des performances financières et indicateurs clés</p>
-                <button class="btn btn-primary" onclick="generateReport('summary')">
-                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                    Générer
-                </button>
-            </div>
-        </div>
-
-        <!-- Résumé financier en temps réel -->
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">Résumé Financier Global</h2>
-                <div class="filters">
-                    <div class="filter-group">
-                        <label class="filter-label">Période</label>
-                        <select class="filter-select" id="periodFilter">
-                            <option value="month">Ce mois</option>
-                            <option value="quarter">Ce trimestre</option>
-                            <option value="year" selected>Cette année</option>
-                            <option value="all">Toutes périodes</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="card-content">
-                <div class="summary-grid">
-                    <div class="summary-item">
-                        <div class="summary-value">42</div>
-                        <div class="summary-label">Total Clients</div>
-                    </div>
-                    <div class="summary-item">
-                        <div class="summary-value">89</div>
-                        <div class="summary-label">Comptes Actifs</div>
-                    </div>
-                    <div class="summary-item">
-                        <div class="summary-value">2 847 235 €</div>
-                        <div class="summary-label">Total Dépôts</div>
-                    </div>
-                    <div class="summary-item">
-                        <div class="summary-value">1 523 890 €</div>
-                        <div class="summary-label">Crédits en Cours</div>
-                    </div>
-                    <div class="summary-item">
-                        <div class="summary-value">156 245 €</div>
-                        <div class="summary-label">Intérêts Perçus</div>
-                    </div>
-                    <div class="summary-item">
-                        <div class="summary-value negative">-89 234 €</div>
-                        <div class="summary-label">Découverts</div>
-                    </div>
-                </div>
-
-                <div class="export-actions">
-                    <button class="btn btn-outline" onclick="exportData('pdf')">
-                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                        Exporter PDF
-                    </button>
-                    <button class="btn btn-outline" onclick="exportData('excel')">
-                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                        Exporter Excel
-                    </button>
-                </div>
-            </div>
-        </div>
+    .summary-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>
+<div class="container">
+  <div class="page-inner">
+    <div class="header">
+      <h1>Rapports</h1>
+      <p>Générez et consultez vos rapports financiers</p>
     </div>
 
-    <script>
-        function generateReport(type) {
-            const reportNames = {
-                'clients': 'Rapport Clients',
-                'transactions': 'Rapport Transactions',
-                'credits': 'Rapport Crédits',
-                'summary': 'Résumé Financier'
-            };
+    <!-- Cartes de rapports -->
+    <div class="reports-grid">
+      <div class="report-card">
+        <div class="report-icon">
+          <svg
+            width="24"
+            height="24"
+            fill="white"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+            ></path>
+          </svg>
+        </div>
+        <h3 class="report-title">Rapport Clients</h3>
+        <p class="report-description">
+          Liste complète des clients avec leurs informations et statistiques de
+          comptes
+        </p>
+        <button class="btn btn-primary" onclick="generateReport('clients')">
+          <svg
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            ></path>
+          </svg>
+          Générer
+        </button>
+      </div>
 
-            // Simulation de génération de rapport
-            const reportName = reportNames[type];
-            
-            // Créer un contenu de rapport simulé
-            let reportContent = '';
-            
-            switch(type) {
-                case 'clients':
-                    reportContent = `
+      <div class="report-card">
+        <div class="report-icon">
+          <svg
+            width="24"
+            height="24"
+            fill="white"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+            ></path>
+          </svg>
+        </div>
+        <h3 class="report-title">Rapport Transactions</h3>
+        <p class="report-description">
+          Historique détaillé de toutes les transactions avec filtres par
+          période
+        </p>
+        <button
+          class="btn btn-primary"
+          onclick="generateReport('transactions')"
+        >
+          <svg
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            ></path>
+          </svg>
+          Générer
+        </button>
+      </div>
+
+      <div class="report-card">
+        <div class="report-icon">
+          <svg
+            width="24"
+            height="24"
+            fill="white"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
+            ></path>
+          </svg>
+        </div>
+        <h3 class="report-title">Rapport Crédits</h3>
+        <p class="report-description">
+          Suivi des crédits en cours, remboursements et performances
+        </p>
+        <button class="btn btn-primary" onclick="generateReport('credits')">
+          <svg
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            ></path>
+          </svg>
+          Générer
+        </button>
+      </div>
+
+      <div class="report-card">
+        <div class="report-icon">
+          <svg
+            width="24"
+            height="24"
+            fill="white"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+            ></path>
+          </svg>
+        </div>
+        <h3 class="report-title">Résumé Financier</h3>
+        <p class="report-description">
+          Vue d'ensemble des performances financières et indicateurs clés
+        </p>
+        <button class="btn btn-primary" onclick="generateReport('summary')">
+          <svg
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            ></path>
+          </svg>
+          Générer
+        </button>
+      </div>
+    </div>
+
+    <!-- Résumé financier en temps réel -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Résumé Financier Global</h2>
+        <div class="filters">
+          <div class="filter-group">
+            <label class="filter-label">Période</label>
+            <select class="filter-select" id="periodFilter">
+              <option value="month">Ce mois</option>
+              <option value="quarter">Ce trimestre</option>
+              <option value="year" selected>Cette année</option>
+              <option value="all">Toutes périodes</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="card-content">
+        <div class="summary-grid">
+          <div class="summary-item">
+            <div class="summary-value">42</div>
+            <div class="summary-label">Total Clients</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-value">89</div>
+            <div class="summary-label">Comptes Actifs</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-value">2 847 235 €</div>
+            <div class="summary-label">Total Dépôts</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-value">1 523 890 €</div>
+            <div class="summary-label">Crédits en Cours</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-value">156 245 €</div>
+            <div class="summary-label">Intérêts Perçus</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-value negative">-89 234 €</div>
+            <div class="summary-label">Découverts</div>
+          </div>
+        </div>
+
+        <div class="export-actions">
+          <button class="btn btn-outline" onclick="exportData('pdf')">
+            <svg
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              ></path>
+            </svg>
+            Exporter PDF
+          </button>
+          <button class="btn btn-outline" onclick="exportData('excel')">
+            <svg
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              ></path>
+            </svg>
+            Exporter Excel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function generateReport(type) {
+    const reportNames = {
+      clients: "Rapport Clients",
+      transactions: "Rapport Transactions",
+      credits: "Rapport Crédits",
+      summary: "Résumé Financier",
+    };
+
+    // Simulation de génération de rapport
+    const reportName = reportNames[type];
+
+    // Créer un contenu de rapport simulé
+    let reportContent = "";
+
+    switch (type) {
+      case "clients":
+        reportContent = `
 === RAPPORT CLIENTS ===
-Date de génération: ${new Date().toLocaleDateString('fr-FR')}
+Date de génération: ${new Date().toLocaleDateString("fr-FR")}
 
 Total clients: 42
 Nouveaux clients (mois): 5
@@ -382,12 +504,12 @@ DÉTAIL PAR CLIENT:
 4. Sophie Leblanc - 1 compte - Solde total: 23 478,90 €
 [... autres clients]
                     `;
-                    break;
-                case 'transactions':
-                    reportContent = `
+        break;
+      case "transactions":
+        reportContent = `
 === RAPPORT TRANSACTIONS ===
-Date de génération: ${new Date().toLocaleDateString('fr-FR')}
-Période: ${document.getElementById('periodFilter').value}
+Date de génération: ${new Date().toLocaleDateString("fr-FR")}
+Période: ${document.getElementById("periodFilter").value}
 
 RÉSUMÉ:
 Total transactions: 1,247
@@ -396,15 +518,15 @@ Retraits: 391 (1,523,890 €)
 Solde net: +1,323,345 €
 
 TRANSACTIONS RÉCENTES:
-${new Date().toLocaleDateString('fr-FR')} - Dépôt - Jean Dupont - 500,00 €
-${new Date().toLocaleDateString('fr-FR')} - Retrait - Marie Martin - 200,00 €
+${new Date().toLocaleDateString("fr-FR")} - Dépôt - Jean Dupont - 500,00 €
+${new Date().toLocaleDateString("fr-FR")} - Retrait - Marie Martin - 200,00 €
 [... autres transactions]
                     `;
-                    break;
-                case 'credits':
-                    reportContent = `
+        break;
+      case "credits":
+        reportContent = `
 === RAPPORT CRÉDITS ===
-Date de génération: ${new Date().toLocaleDateString('fr-FR')}
+Date de génération: ${new Date().toLocaleDateString("fr-FR")}
 
 RÉSUMÉ:
 Crédits actifs: 15
@@ -417,11 +539,11 @@ CRD001 - Jean Dupont - 50,000 € - 3.5% - 52/60 mois
 CRD002 - Marie Martin - 15,000 € - 4.2% - 6/36 mois
 [... autres crédits]
                     `;
-                    break;
-                case 'summary':
-                    reportContent = `
+        break;
+      case "summary":
+        reportContent = `
 === RÉSUMÉ FINANCIER ===
-Date de génération: ${new Date().toLocaleDateString('fr-FR')}
+Date de génération: ${new Date().toLocaleDateString("fr-FR")}
 
 INDICATEURS CLÉS:
 Clients: 42
@@ -436,42 +558,48 @@ Croissance clients: +12%
 Croissance dépôts: +8%
 Taux de défaut: 2.1%
                     `;
-                    break;
-            }
+        break;
+    }
 
-            // Simuler le téléchargement
-            const blob = new Blob([reportContent], { type: 'text/plain' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${reportName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.txt`;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
+    // Simuler le téléchargement
+    const blob = new Blob([reportContent], { type: "text/plain" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${reportName.replace(/\s+/g, "_")}_${
+      new Date().toISOString().split("T")[0]
+    }.txt`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
 
-            alert(`${reportName} généré et téléchargé avec succès!`);
-        }
+    alert(`${reportName} généré et téléchargé avec succès!`);
+  }
 
-        function exportData(format) {
-            const formatNames = {
-                'pdf': 'PDF',
-                'excel': 'Excel'
-            };
+  function exportData(format) {
+    const formatNames = {
+      pdf: "PDF",
+      excel: "Excel",
+    };
 
-            alert(`Export ${formatNames[format]} en cours...\n\nLe fichier sera téléchargé dans quelques instants.`);
-            
-            // Simulation d'export
-            setTimeout(() => {
-                alert(`Export ${formatNames[format]} terminé avec succès!`);
-            }, 2000);
-        }
+    alert(
+      `Export ${formatNames[format]} en cours...\n\nLe fichier sera téléchargé dans quelques instants.`
+    );
 
-        // Mise à jour du résumé selon la période
-        document.getElementById('periodFilter').addEventListener('change', function() {
-            // Ici on pourrait mettre à jour les données selon la période sélectionnée
-            console.log('Période sélectionnée:', this.value);
-        });
-    </script>
+    // Simulation d'export
+    setTimeout(() => {
+      alert(`Export ${formatNames[format]} terminé avec succès!`);
+    }, 2000);
+  }
 
-    {%endblock content%}
+  // Mise à jour du résumé selon la période
+  document
+    .getElementById("periodFilter")
+    .addEventListener("change", function () {
+      // Ici on pourrait mettre à jour les données selon la période sélectionnée
+      console.log("Période sélectionnée:", this.value);
+    });
+</script>
+
+{%endblock content%}

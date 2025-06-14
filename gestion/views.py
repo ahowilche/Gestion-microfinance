@@ -4,6 +4,12 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from .models import Agent, Client, Compte, Mouvement, Credit, Remboursement
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
+
+import json
+
 
 def index(request):
     return render(request, "GMyCom/section/index.html")
@@ -62,4 +68,91 @@ def dashboard(request):
         "total_remboursement": remboursements.aggregate(Sum('montant'))['montant__sum'] or 0,
     }
 
-    return render(request, "dashboard/section/liste_client.html", context)
+    return render(request, "dashboard/section/tableauBord.html", context)
+
+
+#zone des clients 
+@login_required
+def liste_clients(request):
+    user = request.user
+    if user.role == 'admin':
+        clients = Client.objects.all().prefetch_related('comptes')
+    else:
+        clients = Client.objects.filter(agent=user).prefetch_related('comptes')
+
+    # Préparer les données pour le template
+    clients_data = []
+    for client in clients:
+        clients_data.append({
+            'id': client.id,
+            'nom': client.nom,
+            'prenom': client.prenom,
+            'telephone': client.telephone,
+            'adresse': client.adresse,
+            'identifiant': client.identifiant,
+            'dateInscription': client.date_inscription.strftime('%Y-%m-%d'),
+            'comptes': [{
+                'id': compte.id,
+                'numeroCompte': compte.numero_compte,
+                'typeCompte': compte.get_type_compte_display(),
+                'solde': float(compte.solde),
+            } for compte in client.comptes.all()]
+        })
+
+    return render(request, 'dashboard/section/liste_client.html', {
+        'clients_json': json.dumps(clients_data),
+        'clients': clients  # Pour une utilisation future si nécessaire
+    })
+
+@require_http_methods(["DELETE"])
+@csrf_exempt
+def supprimer_client(request, client_id):
+    try:
+        client = Client.objects.get(id=client_id)
+        client.delete()
+        return JsonResponse({'success': True})
+    except Client.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Client non trouvé'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+    
+
+@require_http_methods(["PUT"])
+@csrf_exempt
+def modifier_client(request, client_id):
+    try:
+        data = json.loads(request.body)
+        client = Client.objects.get(id=client_id)
+
+        # Conversion de la date
+        date_inscription = data.get('date_inscription')
+        if date_inscription:
+            try:
+                data['date_inscription'] = datetime.strptime(date_inscription, '%Y-%m-%d').date()
+            except ValueError:
+                return JsonResponse({'success': False, 'message': 'Format de date invalide'}, status=400)
+
+        # Liste des champs modifiables (exclut numero_identifiant)
+        fields = ['nom', 'prenom', 'telephone', 'adresse', 'date_inscription']
+        for field in fields:
+            if field in data:
+                setattr(client, field, data[field])
+
+        client.save()
+
+        return JsonResponse({
+            'success': True,
+            'client': {
+                'nom': client.nom,
+                'prenom': client.prenom,
+                'telephone': client.telephone,
+                'adresse': client.adresse,
+                'numero_identifiant': client.identifiant,  # Renvoi à des fins d'affichage seulement
+                'date_inscription': client.date_inscription.strftime('%Y-%m-%d') if client.date_inscription else None
+            }
+        })
+
+    except Client.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Client non trouvé'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=400)

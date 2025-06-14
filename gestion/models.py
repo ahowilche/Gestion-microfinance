@@ -55,7 +55,14 @@ class Client(models.Model):
 # COMPTE
 # =========================
 class Compte(models.Model):
+    
+    TYPE_CHOICES = [
+        ('epargne', 'Épargne'),
+        ('courant', 'Courant'),
+    ]
+
     client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name="comptes")
+    type_compte = models.CharField(max_length=20, choices=TYPE_CHOICES, default='epargne')
     solde = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     date_creation = models.DateField(auto_now_add=True)
     numero_compte = models.CharField(max_length=20, unique=True, blank=True)

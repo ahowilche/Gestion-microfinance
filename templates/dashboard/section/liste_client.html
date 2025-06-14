@@ -339,27 +339,6 @@
   }
 
   /* Toast styles */
-  .toast {
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    background-color: #10b981;
-    color: white;
-    padding: 1rem 1.5rem;
-    border-radius: 0.5rem;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    transform: translateX(100%);
-    transition: transform 0.3s ease-out;
-    z-index: 1100;
-  }
-
-  .toast.show {
-    transform: translateX(0);
-  }
-
-  .toast.error {
-    background-color: #ef4444;
-  }
 
   /* Responsive design */
   @media (max-width: 768px) {
@@ -409,13 +388,10 @@
   <div class="page-inner">
     <section class="welcome-section">
       <h2>Liste des clients</h2>
-      <button
-        class="btn btn-primary"
-        onclick="window.location.href='formulaire-client.html'"
-      >
+      <a href="" class="btn btn-primary">
         <span class="icon">➕</span>
         Ajouter un client
-      </button>
+      </a>
     </section>
 
     <div class="card">
@@ -434,27 +410,76 @@
             </tr>
           </thead>
           <tbody id="clientTableBody">
-            <!-- Les lignes seront générées par JavaScript -->
+            {% for client in clients %}
+            <tr data-client-id="{{ client.id }}">
+              <td>{{ client.nom }}</td>
+              <td>{{ client.prenom }}</td>
+              <td>{{ client.telephone }}</td>
+              <td
+                style="
+                  max-width: 200px;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  white-space: nowrap;
+                "
+                title="{{ client.adresse }}"
+              >
+                {{ client.adresse }}
+              </td>
+              <td>{{ client.identifiant }}</td>
+              <td>{{ client.date_inscription|date:"d/m/Y" }}</td>
+              <td>
+                <span class="badge">
+                  {{ client.comptes.count }} compte(s)
+                </span>
+              </td>
+              <td>
+                <div class="actions">
+                  <button
+                    class="btn-action edit"
+                    onclick="editClient('{{ client.id }}')"
+                    title="Modifier"
+                  >
+                    ✏️
+                  </button>
+                  <button
+                    class="btn-action account"
+                    onclick="addAccount('{{ client.id }}')"
+                    title="Ajouter un compte"
+                  >
+                    💳
+                  </button>
+                  <button
+                    class="btn-action delete"
+                    onclick="deleteClient('{{ client.id }}', '{{ client.nom }}', '{{ client.prenom }}')"
+                    title="Supprimer"
+                  >
+                    🗑️
+                  </button>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
           </tbody>
         </table>
       </div>
 
-      <div id="emptyState" class="empty-state" style="display: none">
+      {% if not clients %}
+      <div id="emptyState" class="empty-state">
         <div class="empty-icon">👥</div>
         <h3>Aucun client</h3>
         <p>Commencez par ajouter votre premier client.</p>
-        <button
-          class="btn btn-primary"
-          onclick="window.location.href='formulaire-client.html'"
-        >
+        <a href="" class="btn btn-primary">
           <span class="icon">➕</span>
           Ajouter un client
-        </button>
+        </a>
       </div>
+      {% endif %}
     </div>
   </div>
 
-  <!-- Modal Modifier Client - Taille réduite -->
+  <!-- Modals restent identiques dans leur structure HTML -->
+  <!-- Modal Modifier Client -->
   <div id="editClientModal" class="modal">
     <div class="modal-content modal-small">
       <div class="modal-header">
@@ -464,6 +489,7 @@
         >
       </div>
       <form id="editClientForm" class="modal-form">
+        {% csrf_token %}
         <div class="form-row">
           <div class="form-group">
             <label for="editNom">Nom *</label>
@@ -489,6 +515,8 @@
               type="text"
               id="editNumeroIdentifiant"
               name="numeroIdentifiant"
+              readonly
+              style="background-color: #f3f4f6; cursor: not-allowed"
               required
             />
           </div>
@@ -510,16 +538,13 @@
           >
             Annuler
           </button>
-          <button type="submit" class="btn btn-primary">
-            <span class="icon">💾</span>
-            Sauvegarder
-          </button>
+          <button type="submit" class="btn btn-primary">Sauvegarder</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Modal Ajouter Compte - Taille réduite -->
+  <!-- Modal Ajouter Compte -->
   <div id="addAccountModal" class="modal">
     <div class="modal-content modal-small">
       <div class="modal-header">
@@ -532,15 +557,10 @@
         <p>Client: <span id="selectedClientName"></span></p>
       </div>
       <form id="addAccountForm" class="modal-form">
+        {% csrf_token %}
         <div class="form-group">
           <label for="numeroCompte">Numéro de compte *</label>
-          <input
-            type="text"
-            id="numeroCompte"
-            name="numeroCompte"
-            placeholder="Ex: 123456789"
-            required
-          />
+          <input type="text" id="numeroCompte" name="numeroCompte" required />
         </div>
         <div class="form-group">
           <label for="typeCompte">Type de compte *</label>
@@ -548,20 +568,15 @@
             <option value="">Sélectionner un type</option>
             <option value="Compte courant">Compte courant</option>
             <option value="Épargne">Épargne</option>
-            <option value="Livret A">Livret A</option>
-            <option value="PEL">PEL</option>
-            <option value="Assurance vie">Assurance vie</option>
           </select>
         </div>
         <div class="form-group">
-          <label for="soldeInitial">Solde initial (€) *</label>
+          <label for="soldeInitial">Solde initial *</label>
           <input
             type="number"
             id="soldeInitial"
             name="soldeInitial"
             step="0.01"
-            min="0"
-            placeholder="0.00"
             required
           />
         </div>
@@ -578,190 +593,167 @@
       </form>
     </div>
   </div>
-
-  <!-- Toast Notification -->
-  <div id="toast" class="toast">
-    <span id="toastMessage"></span>
-  </div>
+  <!-- ... -->
 </div>
 
 <script>
-  // Données des clients (simulé localStorage)
-  let clients = [
-    {
-      id: "1",
-      nom: "Dupont",
-      prenom: "Jean",
-      telephone: "0123456789",
-      adresse: "123 Rue de la Paix, Paris",
-      numeroIdentifiant: "ID001",
-      dateInscription: "2024-01-15",
-      comptes: [
-        {
-          id: "1",
-          numeroCompte: "123456789",
-          typeCompte: "Compte courant",
-          solde: 1500.5,
-        },
-        {
-          id: "2",
-          numeroCompte: "987654321",
-          typeCompte: "Épargne",
-          solde: 5000.0,
-        },
-      ],
-    },
-    {
-      id: "2",
-      nom: "Martin",
-      prenom: "Marie",
-      telephone: "0987654321",
-      adresse: "456 Avenue des Champs, Lyon",
-      numeroIdentifiant: "ID002",
-      dateInscription: "2024-02-20",
-      comptes: [
-        {
-          id: "3",
-          numeroCompte: "555666777",
-          typeCompte: "Compte courant",
-          solde: 2300.75,
-        },
-      ],
-    },
-  ];
-
-  // Variables globales
+  // Initialiser avec les données Django
+  let clients = JSON.parse("{{ clients_json|escapejs }}");
   let currentEditingClientId = null;
   let currentAddAccountClientId = null;
 
-  // Charger les clients depuis localStorage
-  function loadClients() {
-    const savedClients = localStorage.getItem("clients");
-    if (savedClients) {
-      clients = JSON.parse(savedClients);
-    }
-  }
-
-  // Sauvegarder les clients dans localStorage
-  function saveClients() {
-    localStorage.setItem("clients", JSON.stringify(clients));
-  }
-
-  // Formater la date
   function formatDate(dateString) {
-    return new Date(dateString).toLocaleDateString("fr-FR");
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
   }
 
-  // Afficher le toast
   function showToast(message, isError = false) {
-    const toast = document.getElementById("toast");
-    const toastMessage = document.getElementById("toastMessage");
-
-    toastMessage.textContent = message;
-    toast.className = isError ? "toast error show" : "toast show";
-
-    setTimeout(() => {
-      toast.classList.remove("show");
-    }, 3000);
+    console.log(isError ? "[ERREUR]" : "[SUCCÈS]", message);
   }
 
-  // Rendre la liste des clients
-  function renderClients() {
-    const tbody = document.getElementById("clientTableBody");
-    const emptyState = document.getElementById("emptyState");
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+      const cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === name + "=") {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
 
-    if (clients.length === 0) {
-      tbody.innerHTML = "";
-      emptyState.style.display = "block";
+  function editClient(clientId) {
+    const id = parseInt(clientId);
+    const client = clients.find((c) => c.id === id);
+    if (!client) {
+      showToast("Client introuvable", true);
       return;
     }
 
-    emptyState.style.display = "none";
+    const dateInscription = client.dateInscription
+      ? new Date(client.dateInscription).toISOString().split("T")[0]
+      : "";
 
-    tbody.innerHTML = clients
-      .map(
-        (client) => `
-            <tr>
-                <td>${client.nom}</td>
-                <td>${client.prenom}</td>
-                <td>${client.telephone}</td>
-                <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${
-                  client.adresse
-                }">
-                    ${client.adresse}
-                </td>
-                <td>${client.numeroIdentifiant}</td>
-                <td>${formatDate(client.dateInscription)}</td>
-                <td>
-                    <span class="badge">
-                        ${client.comptes.length} compte${
-          client.comptes.length > 1 ? "s" : ""
-        }
-                    </span>
-                </td>
-                <td>
-                    <div class="actions">
-                        <button class="btn-action edit" onclick="editClient('${
-                          client.id
-                        }')" title="Modifier">
-                            ✏️
-                        </button>
-                        <button class="btn-action account" onclick="addAccount('${
-                          client.id
-                        }')" title="Ajouter un compte">
-                            💳
-                        </button>
-                        <button class="btn-action delete" onclick="deleteClient('${
-                          client.id
-                        }', '${client.nom}', '${
-          client.prenom
-        }')" title="Supprimer">
-                            🗑️
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        `
-      )
-      .join("");
-  }
+    document.getElementById("editNom").value = client.nom || "";
+    document.getElementById("editPrenom").value = client.prenom || "";
+    document.getElementById("editTelephone").value = client.telephone || "";
+    document.getElementById("editAdresse").value = client.adresse || "";
+    document.getElementById("editDateInscription").value = dateInscription;
 
-  // Modifier un client
-  function editClient(clientId) {
-    const client = clients.find((c) => c.id === clientId);
-    if (!client) return;
-
-    currentEditingClientId = clientId;
-
-    // Remplir le formulaire
-    document.getElementById("editNom").value = client.nom;
-    document.getElementById("editPrenom").value = client.prenom;
-    document.getElementById("editTelephone").value = client.telephone;
-    document.getElementById("editAdresse").value = client.adresse;
-    document.getElementById("editNumeroIdentifiant").value =
-      client.numeroIdentifiant;
-    document.getElementById("editDateInscription").value =
-      client.dateInscription;
-
-    // Afficher le modal
+    currentEditingClientId = id;
     document.getElementById("editClientModal").classList.add("show");
   }
 
-  // Supprimer un client
-  function deleteClient(clientId, nom, prenom) {
-    if (
-      confirm(`Êtes-vous sûr de vouloir supprimer le client ${prenom} ${nom} ?`)
-    ) {
-      clients = clients.filter((c) => c.id !== clientId);
-      saveClients();
-      renderClients();
-      showToast(`${prenom} ${nom} a été supprimé avec succès.`);
+  async function handleEditSubmit(event) {
+    event.preventDefault();
+    console.log(
+      "[DEBUG] Tentative de modification du client:",
+      currentEditingClientId
+    );
+
+    try {
+      const formData = {
+        nom: document.getElementById("editNom").value,
+        prenom: document.getElementById("editPrenom").value,
+        telephone: document.getElementById("editTelephone").value,
+        adresse: document.getElementById("editAdresse").value,
+        dateInscription: document.getElementById("editDateInscription").value,
+      };
+
+      console.log("[DEBUG] Données envoyées:", formData);
+
+      const response = await fetch(
+        `/GMyCom/tableau-bord/clients/modifier/${currentEditingClientId}/`,
+        {
+          method: "PUT", // Ou POST si vous préférez
+          headers: {
+            "X-CSRFToken": getCookie("csrftoken"),
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+
+      const data = await response.json();
+      console.log("[DEBUG] Réponse du serveur:", data);
+
+      if (!response.ok) throw new Error(data.message || "Erreur serveur");
+
+      // Mise à jour de l'interface
+      const row = document.querySelector(
+        `tr[data-client-id="${currentEditingClientId}"]`
+      );
+      if (row) {
+        row.cells[0].textContent = formData.nom;
+        row.cells[1].textContent = formData.prenom;
+        row.cells[2].textContent = formData.telephone;
+        row.cells[3].textContent = formData.adresse;
+        row.cells[5].textContent = formatDate(formData.dateInscription);
+      }
+
+      showToast("Client modifié avec succès");
+      closeModal("editClientModal");
+    } catch (error) {
+      console.error("[ERREUR] Échec de la modification:", error);
+      showToast(`Échec: ${error.message}`, true);
     }
   }
 
-  // Ajouter un compte
+  function deleteClient(clientId, nom, prenom) {
+    if (
+      !confirm(
+        `Êtes-vous sûr de vouloir supprimer le client ${prenom} ${nom} ?`
+      )
+    ) {
+      return;
+    }
+
+    const id = parseInt(clientId);
+
+    fetch(`/GMyCom/tableau-bord/clients/supprimer/${id}/`, {
+      method: "DELETE",
+      headers: {
+        "X-CSRFToken": getCookie("csrftoken"),
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Erreur lors de la suppression");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        if (data.success) {
+          const row = document.querySelector(`tr[data-client-id="${id}"]`);
+          if (row) {
+            row.remove();
+            showToast(`Client ${prenom} ${nom} supprimé avec succès`);
+
+            if (document.querySelectorAll("#clientTableBody tr").length === 0) {
+              document.getElementById("emptyState").style.display = "block";
+            }
+          }
+        } else {
+          showToast(data.message || "Erreur lors de la suppression", true);
+        }
+      })
+      .catch((error) => {
+        showToast(error.message || "Erreur réseau", true);
+        console.error("Error:", error);
+      });
+  }
+
   function addAccount(clientId) {
-    const client = clients.find((c) => c.id === clientId);
+    const client = clients.find((c) => c.id == clientId);
     if (!client) return;
 
     currentAddAccountClientId = clientId;
@@ -771,11 +763,68 @@
     document.getElementById("addAccountModal").classList.add("show");
   }
 
-  // Fermer un modal
+  function handleAddAccountSubmit(event) {
+    event.preventDefault();
+
+    if (!currentAddAccountClientId) return;
+
+    const formData = new FormData(event.target);
+    const data = {
+      numero_compte: formData.get("numeroCompte"),
+      type_compte: formData.get("typeCompte"),
+      solde_initial: parseFloat(formData.get("soldeInitial")) || 0,
+    };
+
+    fetch(`/comptes/ajouter/${currentAddAccountClientId}/`, {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": getCookie("csrftoken"),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          const client = clients.find((c) => c.id == currentAddAccountClientId);
+          if (client) {
+            client.comptes.push({
+              id: data.compte.id,
+              numeroCompte: data.compte.numero_compte,
+              typeCompte: data.compte.type_compte,
+              solde: parseFloat(data.compte.solde),
+            });
+
+            const row = document.querySelector(
+              `tr[data-client-id="${currentAddAccountClientId}"]`
+            );
+            if (row) {
+              const badge = row.cells[6].querySelector(".badge");
+              if (badge) {
+                badge.textContent = `${client.comptes.length} compte${
+                  client.comptes.length > 1 ? "s" : ""
+                }`;
+              }
+            }
+          }
+
+          showToast(
+            `Le compte ${data.compte.numero_compte} a été ajouté avec succès.`
+          );
+          closeModal("addAccountModal");
+        } else {
+          showToast(data.message || "Une erreur est survenue", true);
+        }
+      })
+      .catch((error) => {
+        showToast("Erreur réseau", true);
+        console.error("Error:", error);
+      });
+  }
+
   function closeModal(modalId) {
     document.getElementById(modalId).classList.remove("show");
 
-    // Reset forms
     if (modalId === "editClientModal") {
       document.getElementById("editClientForm").reset();
       currentEditingClientId = null;
@@ -785,79 +834,13 @@
     }
   }
 
-  // Gérer la soumission du formulaire d'édition
-  function handleEditSubmit(event) {
-    event.preventDefault();
-
-    if (!currentEditingClientId) return;
-
-    const formData = new FormData(event.target);
-    const clientIndex = clients.findIndex(
-      (c) => c.id === currentEditingClientId
-    );
-
-    if (clientIndex === -1) return;
-
-    // Mettre à jour le client
-    clients[clientIndex] = {
-      ...clients[clientIndex],
-      nom: formData.get("nom"),
-      prenom: formData.get("prenom"),
-      telephone: formData.get("telephone"),
-      adresse: formData.get("adresse"),
-      numeroIdentifiant: formData.get("numeroIdentifiant"),
-      dateInscription: formData.get("dateInscription"),
-    };
-
-    saveClients();
-    renderClients();
-    closeModal("editClientModal");
-    showToast(
-      `${clients[clientIndex].prenom} ${clients[clientIndex].nom} a été modifié avec succès.`
-    );
-  }
-
-  // Gérer la soumission du formulaire d'ajout de compte
-  function handleAddAccountSubmit(event) {
-    event.preventDefault();
-
-    if (!currentAddAccountClientId) return;
-
-    const formData = new FormData(event.target);
-    const clientIndex = clients.findIndex(
-      (c) => c.id === currentAddAccountClientId
-    );
-
-    if (clientIndex === -1) return;
-
-    const newAccount = {
-      id: Date.now().toString(),
-      numeroCompte: formData.get("numeroCompte"),
-      typeCompte: formData.get("typeCompte"),
-      solde: parseFloat(formData.get("soldeInitial")) || 0,
-    };
-
-    clients[clientIndex].comptes.push(newAccount);
-
-    saveClients();
-    renderClients();
-    closeModal("addAccountModal");
-    showToast(`Le compte ${newAccount.numeroCompte} a été ajouté avec succès.`);
-  }
-
-  // Fermer les modals en cliquant en dehors
   function handleModalClick(event) {
     if (event.target.classList.contains("modal")) {
       closeModal(event.target.id);
     }
   }
 
-  // Initialisation
   document.addEventListener("DOMContentLoaded", function () {
-    loadClients();
-    renderClients();
-
-    // Event listeners
     document
       .getElementById("editClientForm")
       .addEventListener("submit", handleEditSubmit);
@@ -865,7 +848,6 @@
       .getElementById("addAccountForm")
       .addEventListener("submit", handleAddAccountSubmit);
 
-    // Fermer les modals en cliquant en dehors
     document
       .getElementById("editClientModal")
       .addEventListener("click", handleModalClick);
@@ -873,7 +855,6 @@
       .getElementById("addAccountModal")
       .addEventListener("click", handleModalClick);
 
-    // Fermer les modals avec Escape
     document.addEventListener("keydown", function (event) {
       if (event.key === "Escape") {
         closeModal("editClientModal");
@@ -882,4 +863,5 @@
     });
   });
 </script>
+
 {%endblock%}
