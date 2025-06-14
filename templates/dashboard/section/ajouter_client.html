@@ -10,76 +10,40 @@
 
     <!-- Form -->
     <div class="card">
-      <form id="clientForm" class="client-form">
+      <form id="clientForm" method="post" class="client-form">
+        {% csrf_token %}
+
         <div class="form-row">
           <div class="form-group">
-            <label for="nom">Nom *</label>
-            <input
-              type="text"
-              id="nom"
-              name="nom"
-              placeholder="Entrez le nom"
-              required
-            />
+            <label for="id_nom">Nom *</label>
+            {{ form.nom }} {{ form.nom.errors }}
           </div>
           <div class="form-group">
-            <label for="prenom">Prénom *</label>
-            <input
-              type="text"
-              id="prenom"
-              name="prenom"
-              placeholder="Entrez le prénom"
-              required
-            />
+            <label for="id_prenom">Prénom *</label>
+            {{ form.prenom }} {{ form.prenom.errors }}
           </div>
-        </div>
-
-        <div class="form-group">
-          <label for="telephone">Téléphone *</label>
-          <input
-            type="tel"
-            id="telephone"
-            name="telephone"
-            placeholder="Ex: 0123456789"
-            required
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="adresse">Adresse *</label>
-          <input
-            type="text"
-            id="adresse"
-            name="adresse"
-            placeholder="Entrez l'adresse complète"
-            required
-          />
         </div>
 
         <div class="form-row">
           <div class="form-group">
-            <label for="numeroIdentifiant">Numéro d'identifiant *</label>
-            <input
-              type="text"
-              id="numeroIdentifiant"
-              name="numeroIdentifiant"
-              placeholder="Ex: ID001"
-              required
-            />
+            <label for="id_email">Email</label>
+            {{ form.email }} {{ form.email.errors }}
           </div>
           <div class="form-group">
-            <label for="dateInscription">Date d'inscription *</label>
-            <input
-              type="date"
-              id="dateInscription"
-              name="dateInscription"
-              required
-            />
+            <label for="id_telephone">Téléphone *</label>
+            {{ form.telephone }} {{ form.telephone.errors }}
           </div>
+        </div>
+
+        <div class="form-group">
+          <label for="id_adresse">Adresse</label>
+          {{ form.adresse }} {{ form.adresse.errors }}
         </div>
 
         <div class="form-actions">
-          <a href="liste-clients.html" class="btn btn-outline"> Annuler </a>
+          <a href="{% url 'liste_clients' %}" class="btn btn-outline"
+            >Annuler</a
+          >
           <button type="submit" class="btn btn-primary">
             <span class="icon">💾</span>
             <span id="submitButtonText">Ajouter le client</span>
@@ -96,17 +60,6 @@
 </div>
 
 <script>
-  // Charger les clients depuis localStorage
-  function loadClients() {
-    const savedClients = localStorage.getItem("clients");
-    return savedClients ? JSON.parse(savedClients) : [];
-  }
-
-  // Sauvegarder les clients dans localStorage
-  function saveClients(clients) {
-    localStorage.setItem("clients", JSON.stringify(clients));
-  }
-
   // Afficher le toast
   function showToast(message, isError = false) {
     const toast = document.getElementById("toast");
@@ -120,124 +73,12 @@
     }, 3000);
   }
 
-  // Obtenir les paramètres URL
-  function getUrlParams() {
-    const params = new URLSearchParams(window.location.search);
-    return {
-      id: params.get("id"),
-      mode: params.get("mode") || "add",
-    };
-  }
-
-  // Charger un client pour modification
-  function loadClientForEdit(clientId) {
-    const clients = loadClients();
-    const client = clients.find((c) => c.id === clientId);
-
-    if (!client) {
-      showToast("Client non trouvé.", true);
-      setTimeout(() => {
-        window.location.href = "liste-clients.html";
-      }, 2000);
-      return;
-    }
-
-    // Mettre à jour les titres
-    document.getElementById("formTitle").textContent = "Modifier le client";
-    document.getElementById("formDescription").textContent =
-      "Modifiez les informations du client";
-    document.getElementById("submitButtonText").textContent = "Sauvegarder";
-
-    // Remplir le formulaire
-    document.getElementById("nom").value = client.nom;
-    document.getElementById("prenom").value = client.prenom;
-    document.getElementById("telephone").value = client.telephone;
-    document.getElementById("adresse").value = client.adresse;
-    document.getElementById("numeroIdentifiant").value =
-      client.numeroIdentifiant;
-    document.getElementById("dateInscription").value = client.dateInscription;
-  }
-
-  // Gérer la soumission du formulaire
-  function handleFormSubmit(event) {
-    event.preventDefault();
-
-    const { id, mode } = getUrlParams();
-    const formData = new FormData(event.target);
-    const clients = loadClients();
-
-    const clientData = {
-      nom: formData.get("nom"),
-      prenom: formData.get("prenom"),
-      telephone: formData.get("telephone"),
-      adresse: formData.get("adresse"),
-      numeroIdentifiant: formData.get("numeroIdentifiant"),
-      dateInscription: formData.get("dateInscription"),
-    };
-
-    if (mode === "edit" && id) {
-      // Modification
-      const clientIndex = clients.findIndex((c) => c.id === id);
-      if (clientIndex === -1) {
-        showToast("Client non trouvé.", true);
-        return;
-      }
-
-      clients[clientIndex] = {
-        ...clients[clientIndex],
-        ...clientData,
-      };
-
-      showToast(
-        `${clientData.prenom} ${clientData.nom} a été modifié avec succès.`
-      );
-    } else {
-      // Ajout
-      const newClient = {
-        ...clientData,
-        id: Date.now().toString(),
-        comptes: [],
-      };
-
-      clients.push(newClient);
-      showToast(
-        `${clientData.prenom} ${clientData.nom} a été ajouté avec succès.`
-      );
-    }
-
-    saveClients(clients);
-
-    // Redirection après 1.5 secondes
-    setTimeout(() => {
-      window.location.href = "liste-clients.html";
-    }, 1500);
-  }
-
   // Initialisation
   document.addEventListener("DOMContentLoaded", function () {
-    const { id, mode } = getUrlParams();
-
-    // Définir la date d'inscription par défaut à aujourd'hui
-    const today = new Date().toISOString().split("T")[0];
-    document.getElementById("dateInscription").value = today;
-
-    // Si mode édition, charger les données du client
-    if (mode === "edit" && id) {
-      loadClientForEdit(id);
-    }
-
-    // Event listener pour le formulaire
-    document
-      .getElementById("clientForm")
-      .addEventListener("submit", handleFormSubmit);
+    // Si des erreurs de formulaire existent, afficher un toast
+    {% if form.errors %}
+      showToast("Veuillez corriger les erreurs dans le formulaire.", true);
+    {% endif %}
   });
-
-  // Fonctions utilitaires pour créer des liens de modification
-  function createEditUrl(clientId) {
-    return `formulaire-client.html?mode=edit&id=${clientId}`;
-  }
-
-  // Exposer la fonction globalement pour pouvoir l'utiliser depuis liste-clients.js
-  window.createEditUrl = createEditUrl;
 </script>
 {%endblock%}

@@ -3,12 +3,23 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
-from .models import Agent, Client, Compte, Mouvement, Credit, Remboursement
+
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
+
+from django.db import transaction
+from decimal import Decimal
+from django.views.generic import CreateView
+from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.messages.views import SuccessMessageMixin
 
 import json
+import random
+
+from .models import Agent, Client, Compte, Mouvement, Credit, Remboursement
 
 
 def index(request):
@@ -156,3 +167,43 @@ def modifier_client(request, client_id):
         return JsonResponse({'success': False, 'message': 'Client non trouvé'}, status=404)
     except Exception as e:
         return JsonResponse({'success': False, 'message': str(e)}, status=400)
+
+
+@csrf_exempt
+def ajouter_compte(request, client_id):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            type_compte = data.get("typeCompte")
+            solde_initial = data.get("soldeInitial")
+
+            client = Client.objects.get(id=client_id)
+
+            if client.comptes.count() >= 2:
+                return JsonResponse({'success': False, 'message': 'Un client ne peut avoir que 2 comptes.'}, status=400)
+
+            compte = Compte.objects.create(
+                client=client,
+                type_compte=type_compte,
+                solde=solde_initial
+            )
+            return JsonResponse({'success': True, 'message': 'Compte créé avec succès.'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+    return JsonResponse({'success': False, 'message': 'Méthode non autorisée'}, status=405)
+
+
+
+class AjouterClient(LoginRequiredMixin, SuccessMessageMixin, CreateView):
+    model = Client
+    fields = ['nom', 'prenom', 'email', 'telephone', 'adresse']
+    template_name = 'dashboard/section/ajouter_client.html'  # Chemin vers votre template
+    success_url = reverse_lazy('liste_clients')
+    success_message = "Le client a été ajouté avec succès"
+
+    def form_valid(self, form):
+        form.instance.agent = self.request.user
+        return super().form_valid(form)
+    
+def liste_compte(request):
+    return render(request, "dashboard/section/liste_compte.html")

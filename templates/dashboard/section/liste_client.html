@@ -388,7 +388,7 @@
   <div class="page-inner">
     <section class="welcome-section">
       <h2>Liste des clients</h2>
-      <a href="" class="btn btn-primary">
+      <a href="{%url 'ajouter_client'%}" class="btn btn-primary">
         <span class="icon">➕</span>
         Ajouter un client
       </a>
@@ -430,7 +430,7 @@
               <td>{{ client.date_inscription|date:"d/m/Y" }}</td>
               <td>
                 <span class="badge">
-                  {{ client.comptes.count }} compte(s)
+                  {{ client.comptes.count }} compte
                 </span>
               </td>
               <td>
@@ -559,15 +559,11 @@
       <form id="addAccountForm" class="modal-form">
         {% csrf_token %}
         <div class="form-group">
-          <label for="numeroCompte">Numéro de compte *</label>
-          <input type="text" id="numeroCompte" name="numeroCompte" required />
-        </div>
-        <div class="form-group">
           <label for="typeCompte">Type de compte *</label>
           <select id="typeCompte" name="typeCompte" required>
             <option value="">Sélectionner un type</option>
-            <option value="Compte courant">Compte courant</option>
-            <option value="Épargne">Épargne</option>
+            <option value="courant">Compte courant</option>
+            <option value="epargne">Épargne</option>
           </select>
         </div>
         <div class="form-group">
@@ -763,63 +759,62 @@
     document.getElementById("addAccountModal").classList.add("show");
   }
 
-  function handleAddAccountSubmit(event) {
+  async function handleAddAccountSubmit(event) {
     event.preventDefault();
 
-    if (!currentAddAccountClientId) return;
+    const typeCompte = document.getElementById("typeCompte").value;
+    const soldeInitial = document.getElementById("soldeInitial").value;
 
-    const formData = new FormData(event.target);
-    const data = {
-      numero_compte: formData.get("numeroCompte"),
-      type_compte: formData.get("typeCompte"),
-      solde_initial: parseFloat(formData.get("soldeInitial")) || 0,
-    };
-
-    fetch(`/comptes/ajouter/${currentAddAccountClientId}/`, {
-      method: "POST",
-      headers: {
-        "X-CSRFToken": getCookie("csrftoken"),
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
-          const client = clients.find((c) => c.id == currentAddAccountClientId);
-          if (client) {
-            client.comptes.push({
-              id: data.compte.id,
-              numeroCompte: data.compte.numero_compte,
-              typeCompte: data.compte.type_compte,
-              solde: parseFloat(data.compte.solde),
-            });
-
-            const row = document.querySelector(
-              `tr[data-client-id="${currentAddAccountClientId}"]`
-            );
-            if (row) {
-              const badge = row.cells[6].querySelector(".badge");
-              if (badge) {
-                badge.textContent = `${client.comptes.length} compte${
-                  client.comptes.length > 1 ? "s" : ""
-                }`;
-              }
-            }
-          }
-
-          showToast(
-            `Le compte ${data.compte.numero_compte} a été ajouté avec succès.`
-          );
-          closeModal("addAccountModal");
-        } else {
-          showToast(data.message || "Une erreur est survenue", true);
+    try {
+      const response = await fetch(
+        `/GMyCom/tableau-bord/compte/ajouter/${currentAddAccountClientId}/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken"),
+          },
+          body: JSON.stringify({
+            typeCompte: typeCompte,
+            soldeInitial: soldeInitial,
+          }),
         }
-      })
-      .catch((error) => {
-        showToast("Erreur réseau", true);
-        console.error("Error:", error);
-      });
+      );
+
+      const data = await response.json();
+      console.log("[DEBUG] Réponse ajout compte:", data);
+
+      if (!response.ok) throw new Error(data.message || "Erreur serveur");
+
+      // ✅ Mise à jour locale du nombre de comptes du client
+      const client = clients.find((c) => c.id == currentAddAccountClientId);
+      if (client) {
+        if (!client.comptes) client.comptes = [];
+        client.comptes.push({ type: typeCompte, solde: soldeInitial });
+        updateClientRow(client.id);
+      }
+
+      showToast(data.message || "Compte ajouté avec succès");
+      closeModal("addAccountModal");
+    } catch (error) {
+      console.error("[ERREUR] Ajout compte:", error);
+      showToast(`Échec: ${error.message}`, true);
+    }
+  }
+
+  function updateClientRow(clientId) {
+    const client = clients.find((c) => c.id == clientId);
+    if (!client) return;
+
+    const row = document.querySelector(`tr[data-client-id="${clientId}"]`);
+    if (row) {
+      const badge = row.cells[6].querySelector(".badge");
+      if (badge) {
+        badge.textContent = `${client.comptes.length} compte${
+          client.comptes.length > 1 ? "s" : ""
+        }`;
+      }
+    }
   }
 
   function closeModal(modalId) {

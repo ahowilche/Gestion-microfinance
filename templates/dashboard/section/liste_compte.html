@@ -8,26 +8,26 @@
     min-height: 100vh;
   }
 
-  .header {
+
+  .welcome-section {
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    margin-bottom: 32px;
+    align-items: flex-start;
+    margin-bottom: 2rem;
     flex-wrap: wrap;
-    gap: 16px;
+    gap: 1rem;
   }
 
-  .header h1 {
-    font-size: 24px;
-    font-weight: 700;
-    color: #111827;
-    margin: 0;
+  .welcome-section h2 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
   }
 
-  .header-info {
-    color: #6b7280;
-    font-size: 14px;
-    margin-top: 4px;
+  .welcome-section p {
+    color: #64748b;
+    margin-bottom: 1rem;
   }
 
   .btn {
@@ -262,29 +262,13 @@
 
 <div class="container">
   <div class="page-inner">
-    <div class="header">
-      <div>
-        <h1>Liste des Comptes</h1>
-        <p class="header-info">6 comptes • Solde total: 72 095,73 €</p>
-      </div>
-      <a href="/accounts/add" class="btn btn-primary">
-        <svg
-          width="16"
-          height="16"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 4v16m8-8H4"
-          ></path>
-        </svg>
-        Ouvrir un compte
+    <section class="welcome-section">
+      <h2>Liste des Comptes</h2>
+      <a href="{%url 'ajouter_client'%}" class="btn btn-primary">
+        <span class="icon">+</span>
+        Effectuer une transaction
       </a>
-    </div>
+    </section>
 
     <h2 class="section-title">Comptes clients</h2>
 
@@ -354,7 +338,6 @@
               <td class="text-right amount-negative">10 183,25 €</td>
               <td>
                 <div class="actions">
-                  <button class="btn btn-outline btn-sm">Détails</button>
                   <button class="btn btn-outline btn-sm">Dépôt</button>
                   <button class="btn btn-outline btn-sm">Retrait</button>
                 </div>
@@ -372,7 +355,7 @@
               <td class="text-right amount-negative">3 043,75 €</td>
               <td>
                 <div class="actions">
-                  <button class="btn btn-outline btn-sm">Détails</button>
+                  
                   <button class="btn btn-outline btn-sm">Dépôt</button>
                   <button class="btn btn-outline btn-sm">Retrait</button>
                 </div>
@@ -390,7 +373,7 @@
               <td class="text-right amount-negative">8 900,00 €</td>
               <td>
                 <div class="actions">
-                  <button class="btn btn-outline btn-sm">Détails</button>
+                  
                   <button class="btn btn-outline btn-sm">Dépôt</button>
                   <button class="btn btn-outline btn-sm">Retrait</button>
                 </div>
@@ -408,7 +391,7 @@
               <td class="text-right amount-negative">4 521,10 €</td>
               <td>
                 <div class="actions">
-                  <button class="btn btn-outline btn-sm">Détails</button>
+                  
                   <button class="btn btn-outline btn-sm">Dépôt</button>
                   <button class="btn btn-outline btn-sm">Retrait</button>
                 </div>
@@ -426,7 +409,7 @@
               <td class="text-right amount-negative">9 588,17 €</td>
               <td>
                 <div class="actions">
-                  <button class="btn btn-outline btn-sm">Détails</button>
+                  
                   <button class="btn btn-outline btn-sm">Dépôt</button>
                   <button class="btn btn-outline btn-sm">Retrait</button>
                 </div>
@@ -444,7 +427,6 @@
               <td class="text-right amount-negative">3 079,25 €</td>
               <td>
                 <div class="actions">
-                  <button class="btn btn-outline btn-sm">Détails</button>
                   <button class="btn btn-outline btn-sm">Dépôt</button>
                   <button class="btn btn-outline btn-sm">Retrait</button>
                 </div>
@@ -548,7 +530,7 @@
         )}</td>
         <td>
           <div class="actions">
-            <button class="btn btn-outline btn-sm">Détails</button>
+            
             <button class="btn btn-outline btn-sm">Dépôt</button>
             <button class="btn btn-outline btn-sm">Retrait</button>
           </div>

@@ -27,7 +27,7 @@ class Client(models.Model):
     prenom = models.CharField(max_length=100)
     email = models.EmailField(blank=True, null=True)
     telephone = models.CharField(max_length=20)
-    adresse = models.TextField(blank=True)
+    adresse = models.CharField(max_length=150)
     date_inscription = models.DateField(default=timezone.now)
 
     def __str__(self):
