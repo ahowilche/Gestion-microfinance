@@ -1,6 +1,6 @@
 from django.urls import path
 from gestion import views
-from .views import AjouterClient
+from .views import AjouterClient, ListeComptesView
 
 
 urlpatterns = [
@@ -18,5 +18,10 @@ urlpatterns = [
     path('GMyCom/tableau-bord/ajouterClient/', AjouterClient.as_view(), name='ajouter_client'),
     
     #Zone des compte
-    path('GMyCom/tableau-bord/compte/liste-compte/', views.liste_compte, name='liste_compte'),
+    path('GMyCom/tableau-bord/compte/liste-compte/', ListeComptesView.as_view(), name='liste_compte'),
+    path('GMyCom/tableau-bord/compte/transaction/', views.effectuer_transaction, name='effectuer_transaction'),
+    path('GMyCom/tableau-bord/compte/transaction/operation/<int:compte_id>/', views.process_transaction, name='process_transaction'),
+
+    
+    #zone de transaction
 ]

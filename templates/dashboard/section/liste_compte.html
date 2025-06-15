@@ -1,4 +1,5 @@
-{%extends "../home.html"%} {%block content%}
+{%extends "../home.html"%} {% load humanize %} {%block content%}
+
 <style>
   .container {
     max-width: 1200px;
@@ -263,8 +264,11 @@
 <div class="container">
   <div class="page-inner">
     <section class="welcome-section">
-      <h2>Liste des Comptes</h2>
-      <a href="{%url 'ajouter_client'%}" class="btn btn-primary">
+      <div>
+        <h2>Liste des Comptes</h2>
+        <p>{{ comptes.count }} compte{{ comptes.count|pluralize }} • Solde total: {{ solde_total|floatformat:2|intcomma }} €</p>
+      </div>
+      <a href="{% url 'effectuer_transaction' %}" class="btn btn-primary">
         <span class="icon">+</span>
         Effectuer une transaction
       </a>
@@ -273,41 +277,30 @@
     <h2 class="section-title">Comptes clients</h2>
 
     <div class="search-filters">
-      <div class="search-row">
-        <div class="search-box">
-          <svg
-            class="search-icon"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            ></path>
-          </svg>
-          <input
-            type="text"
-            id="searchInput"
-            class="search-input"
-            placeholder="Rechercher un compte..."
-          />
+      <form method="get">
+        <div class="search-row">
+          <div class="search-box">
+            <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            <input type="text" name="q" class="search-input" placeholder="Rechercher un compte..." value="{{ request.GET.q }}">
+          </div>
+
+          <select name="type" class="filter-select">
+            <option value="">Tous les types</option>
+            <option value="courant" {% if request.GET.type == 'courant' %}selected{% endif %}>Courant</option>
+            <option value="epargne" {% if request.GET.type == 'epargne' %}selected{% endif %}>Épargne</option>
+          </select>
+
+          <select name="statut" class="filter-select">
+            <option value="">Tous les statuts</option>
+            <option value="positive" {% if request.GET.statut == 'positive' %}selected{% endif %}>Solde positif</option>
+            <option value="negative" {% if request.GET.statut == 'negative' %}selected{% endif %}>Solde négatif</option>
+          </select>
+
+          <button type="submit" class="btn btn-primary">Filtrer</button>
         </div>
-
-        <select id="typeFilter" class="filter-select">
-          <option value="">Tous les types</option>
-          <option value="courant">Courant</option>
-          <option value="epargne">Épargne</option>
-        </select>
-
-        <select id="statusFilter" class="filter-select">
-          <option value="">Tous les statuts</option>
-          <option value="positive">Solde positif</option>
-          <option value="negative">Solde négatif</option>
-        </select>
-      </div>
+      </form>
     </div>
 
     <div class="table-container">
@@ -322,277 +315,73 @@
               <th class="text-right">Solde</th>
               <th class="text-right">Total dépôts</th>
               <th class="text-right">Total retraits</th>
-              <th>Actions</th>
             </tr>
           </thead>
-          <tbody id="accountsTableBody">
+          <tbody>
+            {% for compte in comptes %}
             <tr>
-              <td class="account-number">ACC1234567890</td>
-              <td>Jean Dupont</td>
-              <td>CLI001</td>
+              <td class="account-number">{{ compte.numero_compte }}</td>
+              <td>{{ compte.client.nom_complet }}</td>
+              <td>{{ compte.client.identifiant }}</td>
               <td>
-                <span class="badge badge-courant">Courant</span>
+                <span class="badge {% if compte.type_compte == 'courant' %}badge-courant{% else %}badge-epargne{% endif %}">
+                  {{ compte.get_type_compte_display }}
+                </span>
               </td>
-              <td class="text-right balance">15 247,50 €</td>
-              <td class="text-right amount-positive">25 430,75 €</td>
-              <td class="text-right amount-negative">10 183,25 €</td>
-              <td>
-                <div class="actions">
-                  <button class="btn btn-outline btn-sm">Dépôt</button>
-                  <button class="btn btn-outline btn-sm">Retrait</button>
-                </div>
+              <td class="text-right {% if compte.solde < 0 %}balance negative{% else %}balance{% endif %}">
+                {{ compte.solde|floatformat:2|intcomma }} €
+              </td>
+              <td class="text-right amount-positive">
+                {{ compte.total_depots|default:0|floatformat:2|intcomma }} €
+              </td>
+              <td class="text-right amount-negative">
+                {{ compte.total_retraits|default:0|floatformat:2|intcomma }} €
               </td>
             </tr>
+            {% empty %}
             <tr>
-              <td class="account-number">ACC1234567891</td>
-              <td>Marie Martin</td>
-              <td>CLI002</td>
-              <td>
-                <span class="badge badge-epargne">Épargne</span>
-              </td>
-              <td class="text-right balance">8 956,25 €</td>
-              <td class="text-right amount-positive">12 000,00 €</td>
-              <td class="text-right amount-negative">3 043,75 €</td>
-              <td>
-                <div class="actions">
-                  
-                  <button class="btn btn-outline btn-sm">Dépôt</button>
-                  <button class="btn btn-outline btn-sm">Retrait</button>
-                </div>
-              </td>
+              <td colspan="8" class="empty-state">Aucun compte trouvé</td>
             </tr>
-            <tr>
-              <td class="account-number">ACC1234567892</td>
-              <td>Pierre Durand</td>
-              <td>CLI003</td>
-              <td>
-                <span class="badge badge-courant">Courant</span>
-              </td>
-              <td class="text-right balance negative">-150,00 €</td>
-              <td class="text-right amount-positive">8 750,00 €</td>
-              <td class="text-right amount-negative">8 900,00 €</td>
-              <td>
-                <div class="actions">
-                  
-                  <button class="btn btn-outline btn-sm">Dépôt</button>
-                  <button class="btn btn-outline btn-sm">Retrait</button>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td class="account-number">ACC1234567893</td>
-              <td>Sophie Leblanc</td>
-              <td>CLI004</td>
-              <td>
-                <span class="badge badge-epargne">Épargne</span>
-              </td>
-              <td class="text-right balance">23 478,90 €</td>
-              <td class="text-right amount-positive">28 000,00 €</td>
-              <td class="text-right amount-negative">4 521,10 €</td>
-              <td>
-                <div class="actions">
-                  
-                  <button class="btn btn-outline btn-sm">Dépôt</button>
-                  <button class="btn btn-outline btn-sm">Retrait</button>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td class="account-number">ACC1234567894</td>
-              <td>Antoine Moreau</td>
-              <td>CLI005</td>
-              <td>
-                <span class="badge badge-courant">Courant</span>
-              </td>
-              <td class="text-right balance">5 642,33 €</td>
-              <td class="text-right amount-positive">15 230,50 €</td>
-              <td class="text-right amount-negative">9 588,17 €</td>
-              <td>
-                <div class="actions">
-                  
-                  <button class="btn btn-outline btn-sm">Dépôt</button>
-                  <button class="btn btn-outline btn-sm">Retrait</button>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td class="account-number">ACC1234567895</td>
-              <td>Caroline Petit</td>
-              <td>CLI006</td>
-              <td>
-                <span class="badge badge-epargne">Épargne</span>
-              </td>
-              <td class="text-right balance">18 920,75 €</td>
-              <td class="text-right amount-positive">22 000,00 €</td>
-              <td class="text-right amount-negative">3 079,25 €</td>
-              <td>
-                <div class="actions">
-                  <button class="btn btn-outline btn-sm">Dépôt</button>
-                  <button class="btn btn-outline btn-sm">Retrait</button>
-                </div>
-              </td>
-            </tr>
+            {% endfor %}
           </tbody>
         </table>
       </div>
     </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="pagination">
+      {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.statut %}&statut={{ request.GET.statut }}{% endif %}" class="btn btn-outline">Précédent</a>
+      {% endif %}
+      
+      <span class="current">
+        Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}
+      </span>
+      
+      {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.statut %}&statut={{ request.GET.statut }}{% endif %}" class="btn btn-outline">Suivant</a>
+      {% endif %}
+    </div>
+    {% endif %}
   </div>
 </div>
 
 <script>
-  // Données des comptes avec toutes les informations
-  const accounts = [
-    {
-      accountNumber: "ACC1234567890",
-      clientName: "Jean Dupont",
-      clientId: "CLI001",
-      accountType: "courant",
-      balance: 15247.5,
-      totalDeposits: 25430.75,
-      totalWithdrawals: 10183.25,
-    },
-    {
-      accountNumber: "ACC1234567891",
-      clientName: "Marie Martin",
-      clientId: "CLI002",
-      accountType: "epargne",
-      balance: 8956.25,
-      totalDeposits: 12000.0,
-      totalWithdrawals: 3043.75,
-    },
-    {
-      accountNumber: "ACC1234567892",
-      clientName: "Pierre Durand",
-      clientId: "CLI003",
-      accountType: "courant",
-      balance: -150.0,
-      totalDeposits: 8750.0,
-      totalWithdrawals: 8900.0,
-    },
-    {
-      accountNumber: "ACC1234567893",
-      clientName: "Sophie Leblanc",
-      clientId: "CLI004",
-      accountType: "epargne",
-      balance: 23478.9,
-      totalDeposits: 28000.0,
-      totalWithdrawals: 4521.1,
-    },
-    {
-      accountNumber: "ACC1234567894",
-      clientName: "Antoine Moreau",
-      clientId: "CLI005",
-      accountType: "courant",
-      balance: 5642.33,
-      totalDeposits: 15230.5,
-      totalWithdrawals: 9588.17,
-    },
-    {
-      accountNumber: "ACC1234567895",
-      clientName: "Caroline Petit",
-      clientId: "CLI006",
-      accountType: "epargne",
-      balance: 18920.75,
-      totalDeposits: 22000.0,
-      totalWithdrawals: 3079.25,
-    },
-  ];
-
-  function formatCurrency(amount) {
-    return new Intl.NumberFormat("fr-FR", {
-      style: "currency",
-      currency: "EUR",
-    }).format(amount);
+// Fonctionnalité de recherche côté client pour une meilleure réactivité
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.querySelector('input[name="q"]');
+  const typeFilter = document.querySelector('select[name="type"]');
+  const statusFilter = document.querySelector('select[name="statut"]');
+  
+  if (searchInput && typeFilter && statusFilter) {
+    // Synchroniser les valeurs des filtres avec l'URL
+    const params = new URLSearchParams(window.location.search);
+    searchInput.value = params.get('q') || '';
+    typeFilter.value = params.get('type') || '';
+    statusFilter.value = params.get('statut') || '';
   }
-
-  function createTableRow(account) {
-    const balanceClass = account.balance < 0 ? "balance negative" : "balance";
-    const badgeClass =
-      account.accountType === "courant" ? "badge-courant" : "badge-epargne";
-    const typeName = account.accountType === "courant" ? "Courant" : "Épargne";
-
-    return `
-      <tr>
-        <td class="account-number">${account.accountNumber}</td>
-        <td>${account.clientName}</td>
-        <td>${account.clientId}</td>
-        <td>
-          <span class="badge ${badgeClass}">${typeName}</span>
-        </td>
-        <td class="text-right ${balanceClass}">${formatCurrency(
-      account.balance
-    )}</td>
-        <td class="text-right amount-positive">${formatCurrency(
-          account.totalDeposits
-        )}</td>
-        <td class="text-right amount-negative">${formatCurrency(
-          account.totalWithdrawals
-        )}</td>
-        <td>
-          <div class="actions">
-            
-            <button class="btn btn-outline btn-sm">Dépôt</button>
-            <button class="btn btn-outline btn-sm">Retrait</button>
-          </div>
-        </td>
-      </tr>
-    `;
-  }
-
-  function renderAccounts(accountsToRender = accounts) {
-    const tableBody = document.getElementById("accountsTableBody");
-    if (accountsToRender.length === 0) {
-      tableBody.innerHTML = `
-        <tr>
-          <td colspan="8" class="empty-state">
-            Aucun compte trouvé avec ces critères de recherche.
-          </td>
-        </tr>
-      `;
-    } else {
-      tableBody.innerHTML = accountsToRender.map(createTableRow).join("");
-    }
-  }
-
-  function filterAccounts() {
-    const searchTerm = document
-      .getElementById("searchInput")
-      .value.toLowerCase();
-    const typeFilter = document.getElementById("typeFilter").value;
-    const statusFilter = document.getElementById("statusFilter").value;
-
-    const filtered = accounts.filter((account) => {
-      const matchesSearch =
-        account.clientName.toLowerCase().includes(searchTerm) ||
-        account.accountNumber.toLowerCase().includes(searchTerm) ||
-        account.clientId.toLowerCase().includes(searchTerm);
-
-      const matchesType = !typeFilter || account.accountType === typeFilter;
-
-      const matchesStatus =
-        !statusFilter ||
-        (statusFilter === "positive" && account.balance >= 0) ||
-        (statusFilter === "negative" && account.balance < 0);
-
-      return matchesSearch && matchesType && matchesStatus;
-    });
-
-    renderAccounts(filtered);
-  }
-
-  // Event listeners
-  document
-    .getElementById("searchInput")
-    .addEventListener("input", filterAccounts);
-  document
-    .getElementById("typeFilter")
-    .addEventListener("change", filterAccounts);
-  document
-    .getElementById("statusFilter")
-    .addEventListener("change", filterAccounts);
-
-  // Rendu initial
-  renderAccounts();
+});
 </script>
 
-{%endblock content%}
+{% endblock %}

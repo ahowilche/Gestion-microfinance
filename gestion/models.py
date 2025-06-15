@@ -90,26 +90,34 @@ class Compte(models.Model):
 # =========================
 # MOUVEMENTS : DÉPÔT / RETRAIT
 # =========================
+
 class Mouvement(models.Model):
     TYPE_CHOICES = (
         ('DEPOT', 'Dépôt'),
         ('RETRAIT', 'Retrait'),
     )
-    compte = models.ForeignKey(Compte, on_delete=models.CASCADE)
-    agent = models.ForeignKey(Agent, on_delete=models.SET_NULL, null=True)
+
+    compte = models.ForeignKey("Compte", on_delete=models.CASCADE)
+    agent = models.ForeignKey("Agent", on_delete=models.SET_NULL, null=True)
     type_mouvement = models.CharField(max_length=10, choices=TYPE_CHOICES)
     montant = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateTimeField(default=timezone.now)
 
     def save(self, *args, **kwargs):
         is_new = self.pk is None
-        super().save(*args, **kwargs)
-        if is_new:
-            if self.type_mouvement == 'DEPOT':
-                self.compte.solde += self.montant
-            elif self.type_mouvement == 'RETRAIT':
-                self.compte.solde -= self.montant
-            self.compte.save()
+
+        with transaction.atomic():
+            if is_new:
+                if self.type_mouvement == 'RETRAIT' and self.montant > self.compte.solde:
+                    raise ValueError("Solde insuffisant pour effectuer ce retrait.")
+            super().save(*args, **kwargs)
+
+            if is_new:
+                if self.type_mouvement == 'DEPOT':
+                    self.compte.solde += self.montant
+                elif self.type_mouvement == 'RETRAIT':
+                    self.compte.solde -= self.montant
+                self.compte.save()
 
     def __str__(self):
         return f"{self.type_mouvement} de {self.montant} sur {self.compte.numero_compte}"

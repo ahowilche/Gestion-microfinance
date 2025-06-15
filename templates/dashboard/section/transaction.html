@@ -234,48 +234,14 @@
 
 <div class="container">
   <div class="page-inner">
-  
-     <!-- Welcome Section -->
     <section class="welcome-section">
       <h2>Transactions</h2>
       <p>Effectuer des dépôts et retraits sur les comptes clients</p>
     </section>
 
     <div class="tabs">
-      <button class="tab active" onclick="switchTab('deposit')">
-        <svg
-          width="16"
-          height="16"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 4v16m8-8H4"
-          ></path>
-        </svg>
-        Dépôt
-      </button>
-      <button class="tab" onclick="switchTab('withdraw')">
-        <svg
-          width="16"
-          height="16"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M20 12H4"
-          ></path>
-        </svg>
-        Retrait
-      </button>
+      <button class="tab active" onclick="switchTab('deposit')">Dépôt</button>
+      <button class="tab" onclick="switchTab('withdraw')">Retrait</button>
     </div>
 
     <div id="alert" class="alert">
@@ -287,78 +253,33 @@
       <div id="depositTab" class="tab-content active">
         <h2 style="margin-bottom: 24px">Effectuer un dépôt</h2>
         <form id="depositForm">
+          {% csrf_token %}
           <div class="form-group">
-            <label for="depositAccount"
-              >Compte <span class="required">*</span></label
-            >
+            <label for="depositAccount">Compte <span class="required">*</span></label>
             <select id="depositAccount" name="account" required>
               <option value="">Sélectionner un compte</option>
-              <option value="ACC1234567890">
-                ACC1234567890 - Jean Dupont (Courant)
+              {% for compte in comptes %}
+              <option value="{{ compte.id }}" data-solde="{{ compte.solde }}">
+                {{ compte.numero_compte }} - {{ compte.client.nom }} {{ compte.client.prenom }} ({{ compte.get_type_compte_display }})
               </option>
-              <option value="ACC1234567891">
-                ACC1234567891 - Marie Martin (Épargne)
-              </option>
-              <option value="ACC1234567892">
-                ACC1234567892 - Pierre Durand (Courant)
-              </option>
+              {% endfor %}
             </select>
           </div>
-
-          <div
-            id="depositBalanceInfo"
-            class="balance-info"
-            style="display: none"
-          >
+          <div id="depositBalanceInfo" class="balance-info" style="display: none">
             <h3>Solde actuel</h3>
             <div id="depositCurrentBalance" class="balance-amount">0,00 €</div>
           </div>
-
           <div class="form-group">
-            <label for="depositAmount"
-              >Montant (€) <span class="required">*</span></label
-            >
-            <input
-              type="number"
-              id="depositAmount"
-              name="amount"
-              step="0.01"
-              min="0.01"
-              placeholder="100.00"
-              required
-            />
-            <div class="error-message" id="depositAmountError"></div>
+            <label for="depositAmount">Montant (€) <span class="required">*</span></label>
+            <input type="number" id="depositAmount" name="amount" step="0.01" min="0.01" required />
           </div>
-
           <div class="form-group">
             <label for="depositDescription">Description</label>
-            <input
-              type="text"
-              id="depositDescription"
-              name="description"
-              placeholder="ex: Versement espèces, Virement..."
-            />
+            <input type="text" id="depositDescription" name="description" placeholder="ex: Versement..." />
           </div>
-
           <div class="form-actions">
-            <a href="/accounts" class="btn btn-outline">Annuler</a>
-            <button type="submit" class="btn btn-success">
-              <svg
-                width="16"
-                height="16"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 4v16m8-8H4"
-                ></path>
-              </svg>
-              Effectuer le dépôt
-            </button>
+            <a href="{% url 'liste_compte' %}" class="btn btn-outline">Annuler</a>
+            <button type="submit" class="btn btn-success">Effectuer le dépôt</button>
           </div>
         </form>
       </div>
@@ -367,81 +288,33 @@
       <div id="withdrawTab" class="tab-content">
         <h2 style="margin-bottom: 24px">Effectuer un retrait</h2>
         <form id="withdrawForm">
+          {% csrf_token %}
           <div class="form-group">
-            <label for="withdrawAccount"
-              >Compte <span class="required">*</span></label
-            >
+            <label for="withdrawAccount">Compte <span class="required">*</span></label>
             <select id="withdrawAccount" name="account" required>
               <option value="">Sélectionner un compte</option>
-              <option value="ACC1234567890">
-                ACC1234567890 - Jean Dupont (Courant)
+              {% for compte in comptes %}
+              <option value="{{ compte.id }}" data-solde="{{ compte.solde }}">
+                {{ compte.numero_compte }} - {{ compte.client.nom }} {{ compte.client.prenom }} ({{ compte.get_type_compte_display }})
               </option>
-              <option value="ACC1234567891">
-                ACC1234567891 - Marie Martin (Épargne)
-              </option>
-              <option value="ACC1234567892">
-                ACC1234567892 - Pierre Durand (Courant)
-              </option>
+              {% endfor %}
             </select>
           </div>
-
-          <div
-            id="withdrawBalanceInfo"
-            class="balance-info"
-            style="display: none"
-          >
+          <div id="withdrawBalanceInfo" class="balance-info" style="display: none">
             <h3>Solde actuel</h3>
             <div id="withdrawCurrentBalance" class="balance-amount">0,00 €</div>
           </div>
-
           <div class="form-group">
-            <label for="withdrawAmount"
-              >Montant (€) <span class="required">*</span></label
-            >
-            <input
-              type="number"
-              id="withdrawAmount"
-              name="amount"
-              step="0.01"
-              min="0.01"
-              placeholder="50.00"
-              required
-            />
-            <div class="error-message" id="withdrawAmountError"></div>
-            <div class="help-text">
-              Le retrait ne peut pas dépasser le solde disponible
-            </div>
+            <label for="withdrawAmount">Montant (€) <span class="required">*</span></label>
+            <input type="number" id="withdrawAmount" name="amount" step="0.01" min="0.01" required />
           </div>
-
           <div class="form-group">
             <label for="withdrawDescription">Description</label>
-            <input
-              type="text"
-              id="withdrawDescription"
-              name="description"
-              placeholder="ex: Retrait espèces, Virement..."
-            />
+            <input type="text" id="withdrawDescription" name="description" placeholder="ex: Retrait..." />
           </div>
-
           <div class="form-actions">
-            <a href="/accounts" class="btn btn-outline">Annuler</a>
-            <button type="submit" class="btn btn-primary">
-              <svg
-                width="16"
-                height="16"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M20 12H4"
-                ></path>
-              </svg>
-              Effectuer le retrait
-            </button>
+            <a href="{% url 'liste_compte' %}" class="btn btn-outline">Annuler</a>
+            <button type="submit" class="btn btn-primary">Effectuer le retrait</button>
           </div>
         </form>
       </div>
@@ -450,159 +323,103 @@
 </div>
 
 <script>
-  // Données des comptes
-  const accounts = {
-    ACC1234567890: { balance: 15247.5, client: "Jean Dupont" },
-    ACC1234567891: { balance: 8956.25, client: "Marie Martin" },
-    ACC1234567892: { balance: -150.0, client: "Pierre Durand" },
-  };
-
   function switchTab(tabName) {
-    // Masquer tous les onglets
-    document.querySelectorAll(".tab-content").forEach((tab) => {
-      tab.classList.remove("active");
-    });
-    document.querySelectorAll(".tab").forEach((tab) => {
-      tab.classList.remove("active");
-    });
-
-    // Afficher l'onglet sélectionné
+    document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
+    document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
     document.getElementById(tabName + "Tab").classList.add("active");
     event.target.classList.add("active");
   }
 
   function formatCurrency(amount) {
-    return new Intl.NumberFormat("fr-FR", {
-      style: "currency",
+    return new Intl.NumberFormat("fr-FR", { 
+      style: "currency", 
       currency: "EUR",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
     }).format(amount);
-  }
-
-  function showAlert(message, type = "success") {
-    const alert = document.getElementById("alert");
-    const alertMessage = document.getElementById("alertMessage");
-
-    alert.className = `alert alert-${type} show`;
-    alertMessage.textContent = message;
-
-    setTimeout(() => {
-      alert.classList.remove("show");
-    }, 5000);
   }
 
   function updateBalance(selectId, balanceInfoId, balanceAmountId) {
     const select = document.getElementById(selectId);
-    const balanceInfo = document.getElementById(balanceInfoId);
-    const balanceAmount = document.getElementById(balanceAmountId);
-
-    if (select.value && accounts[select.value]) {
-      const account = accounts[select.value];
+    const selectedOption = select.options[select.selectedIndex];
+    
+    if (selectedOption.value) {
+      const solde = parseFloat(selectedOption.dataset.solde);
+      const balanceInfo = document.getElementById(balanceInfoId);
+      const balanceAmount = document.getElementById(balanceAmountId);
+      
       balanceInfo.style.display = "block";
-      balanceAmount.textContent = formatCurrency(account.balance);
-      balanceAmount.className =
-        account.balance < 0 ? "balance-amount negative" : "balance-amount";
+      balanceAmount.textContent = formatCurrency(solde);
+      balanceAmount.className = solde < 0 ? "balance-amount negative" : "balance-amount";
     } else {
-      balanceInfo.style.display = "none";
+      document.getElementById(balanceInfoId).style.display = "none";
     }
   }
 
-  // Event listeners pour les comptes
-  document
-    .getElementById("depositAccount")
-    .addEventListener("change", function () {
-      updateBalance(
-        "depositAccount",
-        "depositBalanceInfo",
-        "depositCurrentBalance"
-      );
+  // Initialisation des événements
+  document.addEventListener("DOMContentLoaded", function() {
+    // Gestion des changements de sélection de compte
+    document.getElementById("depositAccount").addEventListener("change", function() {
+      updateBalance("depositAccount", "depositBalanceInfo", "depositCurrentBalance");
     });
 
-  document
-    .getElementById("withdrawAccount")
-    .addEventListener("change", function () {
-      updateBalance(
-        "withdrawAccount",
-        "withdrawBalanceInfo",
-        "withdrawCurrentBalance"
-      );
+    document.getElementById("withdrawAccount").addEventListener("change", function() {
+      updateBalance("withdrawAccount", "withdrawBalanceInfo", "withdrawCurrentBalance");
     });
 
-  // Formulaire de dépôt
-  document
-    .getElementById("depositForm")
-    .addEventListener("submit", function (e) {
-      e.preventDefault();
+    // Gestion de la soumission des formulaires
+    document.getElementById("depositForm").addEventListener("submit", handleSubmit);
+    document.getElementById("withdrawForm").addEventListener("submit", handleSubmit);
+  });
 
-      const formData = new FormData(this);
-      const accountId = formData.get("account");
-      const amount = parseFloat(formData.get("amount"));
-      const description = formData.get("description");
+  async function handleSubmit(e) {
+  e.preventDefault();
+  const form = e.target;
+  const isDeposit = form.id === "depositForm";
+  const typeTransaction = isDeposit ? "DEPOT" : "RETRAIT";
 
-      if (!accountId || !amount || amount <= 0) {
-        showAlert("Veuillez remplir tous les champs obligatoires", "error");
-        return;
-      }
+  const formData = new FormData(form);
+  formData.append("type_mouvement", typeTransaction);
 
-      // Simulation de transaction
-      if (accounts[accountId]) {
-        accounts[accountId].balance += amount;
+  const accountId = formData.get("account"); // l’ID du compte
+  const url = `/GMyCom/tableau-bord/compte/transaction/operation/${accountId}/`;
 
-        console.log("Dépôt effectué:", {
-          account: accountId,
-          amount,
-          description,
-          newBalance: accounts[accountId].balance,
-        });
-
-        showAlert(
-          `Dépôt de ${formatCurrency(
-            amount
-          )} effectué avec succès sur le compte ${accountId}`
-        );
-        this.reset();
-        document.getElementById("depositBalanceInfo").style.display = "none";
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      body: formData,
+      headers: {
+        "X-CSRFToken": "{{ csrf_token }}",
       }
     });
 
-  // Formulaire de retrait
-  document
-    .getElementById("withdrawForm")
-    .addEventListener("submit", function (e) {
-      e.preventDefault();
+    const data = await response.json();
+    showAlert(data.success, data.message);
 
-      const formData = new FormData(this);
-      const accountId = formData.get("account");
-      const amount = parseFloat(formData.get("amount"));
-      const description = formData.get("description");
+    if (data.success) {
+      form.reset();
+      const selectId = isDeposit ? "depositAccount" : "withdrawAccount";
+      updateBalance(selectId, `${selectId}BalanceInfo`, `${selectId}CurrentBalance`);
+    }
+  } catch (error) {
+    console.error("Erreur:", error);
+    showAlert(false, "Une erreur est survenue lors de la transaction");
+  }
+}
 
-      if (!accountId || !amount || amount <= 0) {
-        showAlert("Veuillez remplir tous les champs obligatoires", "error");
-        return;
-      }
 
-      if (accounts[accountId]) {
-        if (accounts[accountId].balance < amount) {
-          showAlert("Solde insuffisant pour effectuer ce retrait", "error");
-          return;
-        }
-
-        accounts[accountId].balance -= amount;
-
-        console.log("Retrait effectué:", {
-          account: accountId,
-          amount,
-          description,
-          newBalance: accounts[accountId].balance,
-        });
-
-        showAlert(
-          `Retrait de ${formatCurrency(
-            amount
-          )} effectué avec succès sur le compte ${accountId}`
-        );
-        this.reset();
-        document.getElementById("withdrawBalanceInfo").style.display = "none";
-      }
-    });
+  function showAlert(isSuccess, message) {
+    const alert = document.getElementById("alert");
+    const alertMessage = document.getElementById("alertMessage");
+    
+    alert.className = `alert ${isSuccess ? "alert-success" : "alert-error"} show`;
+    alertMessage.textContent = message;
+    
+    setTimeout(() => {
+      alert.className = "alert";
+    }, 5000);
+  }
 </script>
+
+
 {%endblock%}

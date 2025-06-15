@@ -1,13 +1,14 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Sum
+from django.db.models import Sum, Q
 
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
+from django.views.generic import ListView
 
 from django.db import transaction
 from decimal import Decimal
@@ -205,5 +206,128 @@ class AjouterClient(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         form.instance.agent = self.request.user
         return super().form_valid(form)
     
-def liste_compte(request):
-    return render(request, "dashboard/section/liste_compte.html")
+
+class ListeComptesView(ListView):
+    model = Compte
+    template_name = 'dashboard/section/liste_compte.html'
+    context_object_name = 'comptes'
+    paginate_by = 10
+
+    def get_queryset(self):
+        queryset = super().get_queryset().select_related('client')
+        
+        # Filtrage par recherche
+        search_query = self.request.GET.get('q')
+        if search_query:
+            queryset = queryset.filter(
+                Q(numero_compte__icontains=search_query) |
+                Q(client__nom__icontains=search_query) |
+                Q(client__prenom__icontains=search_query) |
+                Q(client__identifiant__icontains=search_query)
+            )
+        
+        # Filtrage par type de compte
+        type_compte = self.request.GET.get('type')
+        if type_compte in ['epargne', 'courant']:
+            queryset = queryset.filter(type_compte=type_compte)
+        
+        # Filtrage par statut de solde
+        statut = self.request.GET.get('statut')
+        if statut == 'positive':
+            queryset = queryset.filter(solde__gte=0)
+        elif statut == 'negative':
+            queryset = queryset.filter(solde__lt=0)
+        
+        # Annoter avec les totaux de dépôts et retraits en utilisant le modèle Mouvement
+        queryset = queryset.annotate(
+            total_depots=Sum('mouvement__montant', filter=Q(mouvement__type_mouvement='DEPOT')),
+            total_retraits=Sum('mouvement__montant', filter=Q(mouvement__type_mouvement='RETRAIT'))
+        )
+        
+        return queryset.order_by('-date_creation')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Calcul du solde total
+        context['solde_total'] = Compte.objects.aggregate(
+            total=Sum('solde')
+        )['total'] or 0
+        
+        # Transmission des paramètres de filtrage pour le template
+        context['search_query'] = self.request.GET.get('q', '')
+        context['type_filter'] = self.request.GET.get('type', '')
+        context['statut_filter'] = self.request.GET.get('statut', '')
+        
+        return context
+
+    
+
+@login_required
+def effectuer_transaction(request):
+    comptes = Compte.objects.select_related('client').all()
+    return render(request, "dashboard/section/transaction.html", {"comptes": comptes})
+
+@csrf_exempt
+@login_required
+def process_transaction(request, compte_id):
+    if request.method == "POST":
+        try:
+            compte = get_object_or_404(Compte, id=compte_id)
+
+            type_mouvement = request.POST.get("type_mouvement")
+            montant_str = request.POST.get("amount")
+            description = request.POST.get("description", "")
+
+            if not all([type_mouvement, montant_str]):
+                return JsonResponse({
+                    "success": False,
+                    "message": "Données manquantes"
+                }, status=400)
+
+            try:
+                montant = float(montant_str)
+                if montant <= 0:
+                    return JsonResponse({
+                        "success": False,
+                        "message": "Le montant doit être positif"
+                    }, status=400)
+            except ValueError:
+                return JsonResponse({
+                    "success": False,
+                    "message": "Montant invalide"
+                }, status=400)
+
+            # Création du mouvement (le modèle gère la validation et mise à jour du solde)
+            mouvement = Mouvement(
+                compte=compte,
+                agent=request.user,
+                type_mouvement=type_mouvement,
+                montant=montant,
+                date=timezone.now()
+            )
+
+            mouvement.save()
+
+            return JsonResponse({
+                "success": True,
+                "message": f"{type_mouvement} réussi",
+                "new_balance": compte.solde
+            })
+
+        except ValueError as ve:
+            return JsonResponse({
+                "success": False,
+                "message": str(ve)
+            }, status=400)
+
+        except Exception as e:
+            return JsonResponse({
+                "success": False,
+                "message": f"Erreur serveur : {str(e)}"
+            }, status=500)
+
+    return JsonResponse({
+        "success": False,
+        "message": "Méthode non autorisée"
+    }, status=405)
