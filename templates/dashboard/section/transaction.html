@@ -6,13 +6,34 @@
     box-sizing: border-box;
   }
 
-  .container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 24px;
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      "Helvetica Neue", Arial, sans-serif;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #dbeafe 0%, #ffffff 50%, #dcfce7 100%);
   }
 
-   .welcome-section {
+  .brand-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+  }
+
+  .btn-outline {
+    padding: 0.5rem 1rem;
+    color: #6b7280;
+    border: 1px solid #d1d5db;
+    background: white;
+    border-radius: 0.375rem;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .btn-outline:hover {
+    background: #f9fafb;
+  }
+
+  .welcome-section {
     margin-bottom: 2rem;
   }
 
@@ -27,174 +48,13 @@
     color: #6b7280;
   }
 
-  .tabs {
-    display: flex;
-    background: white;
-    border-radius: 8px;
-    padding: 4px;
-    margin-bottom: 24px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  }
-
-  .tab {
-    flex: 1;
-    padding: 12px 16px;
-    text-align: center;
-    background: none;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.2s;
-  }
-
-  .tab.active {
-    background-color: #2563eb;
-    color: white;
-  }
-
-  .tab:not(.active) {
-    color: #6b7280;
-  }
-
-  .tab:not(.active):hover {
-    background-color: #f3f4f6;
-  }
-
-  .card {
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e5e7eb;
-    padding: 24px;
-  }
-
-  .form-group {
-    margin-bottom: 20px;
-  }
-
-  label {
-    display: block;
-    font-weight: 500;
-    margin-bottom: 8px;
-    color: #374151;
-  }
-
-  .required {
-    color: #ef4444;
-  }
-
-  input,
-  select {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    font-size: 14px;
-    transition: border-color 0.2s;
-  }
-
-  input:focus,
-  select:focus {
-    outline: none;
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-  }
-
-  .error {
-    border-color: #ef4444 !important;
-  }
-
-  .error-message {
-    color: #ef4444;
-    font-size: 12px;
-    margin-top: 4px;
-  }
-
-  .help-text {
-    color: #6b7280;
-    font-size: 12px;
-    margin-top: 4px;
-  }
-
-  .balance-info {
-    background-color: #f0f9ff;
-    border: 1px solid #bae6fd;
-    border-radius: 8px;
-    padding: 16px;
-    margin: 16px 0;
-  }
-
-  .balance-info h3 {
-    color: #0369a1;
-    font-size: 14px;
-    margin-bottom: 8px;
-  }
-
-  .balance-amount {
-    font-size: 20px;
-    font-weight: 700;
-    color: #059669;
-  }
-
-  .balance-amount.negative {
-    color: #dc2626;
-  }
-
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 24px;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 500;
-    text-decoration: none;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .btn-primary {
-    background-color: #2563eb;
-    color: white;
-  }
-
-  .btn-primary:hover {
-    background-color: #1d4ed8;
-  }
-
-  .btn-success {
-    background-color: #059669;
-    color: white;
-  }
-
-  .btn-success:hover {
-    background-color: #047857;
-  }
-
-  .btn-outline {
-    border: 1px solid #d1d5db;
-    background: white;
-    color: #374151;
-  }
-
-  .btn-outline:hover {
-    background-color: #f9fafb;
-  }
-
-  .form-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 16px;
-    margin-top: 32px;
-  }
-
+  /* Alert */
   .alert {
     display: none;
-    padding: 16px;
-    border-radius: 8px;
-    margin-bottom: 24px;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid;
   }
 
   .alert.show {
@@ -204,15 +64,69 @@
   .alert-success {
     background-color: #f0fdf4;
     color: #15803d;
-    border: 1px solid #22c55e;
+    border-color: #22c55e;
   }
 
   .alert-error {
     background-color: #fef2f2;
     color: #dc2626;
-    border: 1px solid #ef4444;
+    border-color: #ef4444;
   }
 
+  /* Card */
+  .card {
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+  }
+
+  .card-content {
+    display: block;
+    padding: 1.5rem;
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    background: #f1f5f9;
+    border-radius: 0.375rem;
+    padding: 0.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: none;
+    border: none;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
+    color: #64748b;
+  }
+
+  .tab.active {
+    background: white;
+    color: #0f172a;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .tab:hover:not(.active) {
+    color: #334155;
+  }
+
+  .tab-icon {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  /* Tab Content */
   .tab-content {
     display: none;
   }
@@ -221,205 +135,480 @@
     display: block;
   }
 
+  .tab-content h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Form */
+  .form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .form-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+  }
+
+  .required {
+    color: #ef4444;
+  }
+
+  .form-input,
+  .form-select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    font-size: 1rem;
+    transition: all 0.2s;
+  }
+
+  .form-input:focus,
+  .form-select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+
+  /* Balance Info */
+  .balance-info {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin: 1rem 0;
+    display: none;
+  }
+
+  .balance-info.show {
+    display: block;
+  }
+
+  .balance-info h4 {
+    color: #0369a1;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+
+  .balance-amount {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #059669;
+  }
+
+  .balance-amount.negative {
+    color: #dc2626;
+  }
+
+  /* Form Actions */
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding-top: 1rem;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-primary {
+    background: #2563eb;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: #1d4ed8;
+  }
+
+  .btn-success {
+    background: #059669;
+    color: white;
+  }
+
+  .btn-success:hover {
+    background: #047857;
+  }
+
+  .btn-outline {
+    border: 1px solid #d1d5db;
+    background: white;
+    color: #374151;
+  }
+
+  .btn-outline:hover {
+    background: #f9fafb;
+  }
+
+  /* Footer */
+  .footer {
+    background: #111827;
+    color: white;
+    padding: 2rem 1rem;
+    margin-top: 4rem;
+  }
+
+  .footer-content {
+    max-width: 80rem;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .footer-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .footer-logo-icon {
+    width: 2rem;
+    height: 2rem;
+    background: linear-gradient(135deg, #2563eb, #22c55e);
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+  }
+
+  .footer-brand {
+    font-size: 1.125rem;
+    font-weight: 600;
+  }
+
+  .footer-text {
+    color: #9ca3af;
+  }
+
+  /* Responsive */
   @media (max-width: 768px) {
-    .container {
-      padding: 16px;
+    .main-content {
+      padding: 1rem;
     }
 
     .form-actions {
       flex-direction: column;
+    }
+
+    .tab {
+      font-size: 0.875rem;
+      padding: 0.5rem 0.75rem;
+    }
+
+    .card-content {
+      padding: 1rem;
     }
   }
 </style>
 
 <div class="container">
   <div class="page-inner">
-    <section class="welcome-section">
+    <!-- Welcome Section -->
+    <div class="welcome-section">
       <h2>Transactions</h2>
       <p>Effectuer des dépôts et retraits sur les comptes clients</p>
-    </section>
-
-    <div class="tabs">
-      <button class="tab active" onclick="switchTab('deposit')">Dépôt</button>
-      <button class="tab" onclick="switchTab('withdraw')">Retrait</button>
     </div>
 
+    <!-- Alert -->
     <div id="alert" class="alert">
       <span id="alertMessage"></span>
     </div>
 
+    <!-- Transactions Card -->
     <div class="card">
-      <!-- Onglet Dépôt -->
-      <div id="depositTab" class="tab-content active">
-        <h2 style="margin-bottom: 24px">Effectuer un dépôt</h2>
-        <form id="depositForm">
-          {% csrf_token %}
-          <div class="form-group">
-            <label for="depositAccount">Compte <span class="required">*</span></label>
-            <select id="depositAccount" name="account" required>
-              <option value="">Sélectionner un compte</option>
-              {% for compte in comptes %}
-              <option value="{{ compte.id }}" data-solde="{{ compte.solde }}">
-                {{ compte.numero_compte }} - {{ compte.client.nom }} {{ compte.client.prenom }} ({{ compte.get_type_compte_display }})
-              </option>
-              {% endfor %}
-            </select>
-          </div>
-          <div id="depositBalanceInfo" class="balance-info" style="display: none">
-            <h3>Solde actuel</h3>
-            <div id="depositCurrentBalance" class="balance-amount">0,00 €</div>
-          </div>
-          <div class="form-group">
-            <label for="depositAmount">Montant (€) <span class="required">*</span></label>
-            <input type="number" id="depositAmount" name="amount" step="0.01" min="0.01" required />
-          </div>
-          <div class="form-group">
-            <label for="depositDescription">Description</label>
-            <input type="text" id="depositDescription" name="description" placeholder="ex: Versement..." />
-          </div>
-          <div class="form-actions">
-            <a href="{% url 'liste_compte' %}" class="btn btn-outline">Annuler</a>
-            <button type="submit" class="btn btn-success">Effectuer le dépôt</button>
-          </div>
-        </form>
-      </div>
+      <div class="card-content">
+        <div class="tabs">
+          <button class="tab active" onclick="switchTab('deposit', event)">
+            Dépôt
+          </button>
+          <button class="tab" onclick="switchTab('withdraw', event)">
+            Retrait
+          </button>
+        </div>
 
-      <!-- Onglet Retrait -->
-      <div id="withdrawTab" class="tab-content">
-        <h2 style="margin-bottom: 24px">Effectuer un retrait</h2>
-        <form id="withdrawForm">
-          {% csrf_token %}
-          <div class="form-group">
-            <label for="withdrawAccount">Compte <span class="required">*</span></label>
-            <select id="withdrawAccount" name="account" required>
-              <option value="">Sélectionner un compte</option>
-              {% for compte in comptes %}
-              <option value="{{ compte.id }}" data-solde="{{ compte.solde }}">
-                {{ compte.numero_compte }} - {{ compte.client.nom }} {{ compte.client.prenom }} ({{ compte.get_type_compte_display }})
-              </option>
-              {% endfor %}
-            </select>
-          </div>
-          <div id="withdrawBalanceInfo" class="balance-info" style="display: none">
-            <h3>Solde actuel</h3>
-            <div id="withdrawCurrentBalance" class="balance-amount">0,00 €</div>
-          </div>
-          <div class="form-group">
-            <label for="withdrawAmount">Montant (€) <span class="required">*</span></label>
-            <input type="number" id="withdrawAmount" name="amount" step="0.01" min="0.01" required />
-          </div>
-          <div class="form-group">
-            <label for="withdrawDescription">Description</label>
-            <input type="text" id="withdrawDescription" name="description" placeholder="ex: Retrait..." />
-          </div>
-          <div class="form-actions">
-            <a href="{% url 'liste_compte' %}" class="btn btn-outline">Annuler</a>
-            <button type="submit" class="btn btn-primary">Effectuer le retrait</button>
-          </div>
-        </form>
+        <!-- Onglet Dépôt -->
+        <div id="depositTab" class="tab-content active">
+          <h2>Effectuer un dépôt</h2>
+          <form id="depositForm">
+            {% csrf_token %}
+            <div class="form-group">
+              <label for="depositAccount"
+                >Compte <span class="required">*</span></label
+              >
+              <select id="depositAccount" name="account" required>
+                <option value="">Sélectionner un compte</option>
+                {% for compte in comptes %}
+                <option value="{{ compte.id }}" data-solde="{{ compte.solde }}">
+                  {{ compte.numero_compte }} - {{ compte.client.nom }}
+                  {{compte.client.prenom }} 
+                  ({{compte.get_type_compte_display}})
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div
+              id="depositBalanceInfo"
+              class="balance-info"
+              style="display: none"
+            >
+              <h3>Solde actuel</h3>
+              <div id="depositCurrentBalance" class="balance-amount">
+                0,00 €
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="depositAmount"
+                >Montant (€) <span class="required">*</span></label
+              >
+              <input
+                type="number"
+                id="depositAmount"
+                name="amount"
+                step="0.01"
+                min="0.01"
+                required
+              />
+            </div>
+
+            <div class="form-actions">
+              <a href="{% url 'liste_compte' %}" class="btn btn-outline"
+                >Annuler</a
+              >
+              <button type="submit" class="btn btn-success">
+                Effectuer le dépôt
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Onglet Retrait -->
+        <div id="withdrawTab" class="tab-content">
+          <h2 style="margin-bottom: 24px">Effectuer un retrait</h2>
+          <form id="withdrawForm">
+            {% csrf_token %}
+            <div class="form-group">
+              <label for="withdrawAccount"
+                >Compte <span class="required">*</span></label
+              >
+              <select id="withdrawAccount" name="account" required>
+                <option value="">Sélectionner un compte</option>
+                {% for compte in comptes %}
+                <option value="{{ compte.id }}" data-solde="{{ compte.solde }}">
+                  {{ compte.numero_compte }} - {{ compte.client.nom }}
+                  {{compte.client.prenom }} ({{ compte.get_type_compte_display}})
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div
+              id="withdrawBalanceInfo"
+              class="balance-info"
+              style="display: none"
+            >
+              <h3>Solde actuel</h3>
+              <div id="withdrawCurrentBalance" class="balance-amount">
+                0,00 €
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="withdrawAmount"
+                >Montant (€) <span class="required">*</span></label
+              >
+              <input
+                type="number"
+                id="withdrawAmount"
+                name="amount"
+                step="0.01"
+                min="0.01"
+                required
+              />
+            </div>
+            <div class="form-actions">
+              <a href="{% url 'liste_compte' %}" class="btn btn-outline"
+                >Annuler</a
+              >
+              <button type="submit" class="btn btn-primary">
+                Effectuer le retrait
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   </div>
 </div>
-
 <script>
-  function switchTab(tabName) {
-    document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
-    document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
+  function switchTab(tabName, event) {
+    document
+      .querySelectorAll(".tab-content")
+      .forEach((tab) => tab.classList.remove("active"));
+    document
+      .querySelectorAll(".tab")
+      .forEach((tab) => tab.classList.remove("active"));
     document.getElementById(tabName + "Tab").classList.add("active");
-    event.target.classList.add("active");
+    if (event && event.target) {
+      event.target.classList.add("active");
+    }
   }
 
   function formatCurrency(amount) {
-    return new Intl.NumberFormat("fr-FR", { 
-      style: "currency", 
+    return new Intl.NumberFormat("fr-FR", {
+      style: "currency",
       currency: "EUR",
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      maximumFractionDigits: 2,
     }).format(amount);
   }
 
   function updateBalance(selectId, balanceInfoId, balanceAmountId) {
     const select = document.getElementById(selectId);
     const selectedOption = select.options[select.selectedIndex];
-    
+
     if (selectedOption.value) {
       const solde = parseFloat(selectedOption.dataset.solde);
       const balanceInfo = document.getElementById(balanceInfoId);
       const balanceAmount = document.getElementById(balanceAmountId);
-      
-      balanceInfo.style.display = "block";
-      balanceAmount.textContent = formatCurrency(solde);
-      balanceAmount.className = solde < 0 ? "balance-amount negative" : "balance-amount";
+
+      if (balanceInfo && balanceAmount) {
+        balanceInfo.style.display = "block";
+        balanceAmount.textContent = formatCurrency(solde);
+        balanceAmount.className =
+          solde < 0 ? "balance-amount negative" : "balance-amount";
+      }
     } else {
-      document.getElementById(balanceInfoId).style.display = "none";
+      const balanceInfo = document.getElementById(balanceInfoId);
+      if (balanceInfo) {
+        balanceInfo.style.display = "none";
+      }
     }
   }
 
   // Initialisation des événements
-  document.addEventListener("DOMContentLoaded", function() {
+  document.addEventListener("DOMContentLoaded", function () {
     // Gestion des changements de sélection de compte
-    document.getElementById("depositAccount").addEventListener("change", function() {
-      updateBalance("depositAccount", "depositBalanceInfo", "depositCurrentBalance");
-    });
+    document
+      .getElementById("depositAccount")
+      .addEventListener("change", function () {
+        updateBalance(
+          "depositAccount",
+          "depositBalanceInfo",
+          "depositCurrentBalance"
+        );
+      });
 
-    document.getElementById("withdrawAccount").addEventListener("change", function() {
-      updateBalance("withdrawAccount", "withdrawBalanceInfo", "withdrawCurrentBalance");
-    });
+    document
+      .getElementById("withdrawAccount")
+      .addEventListener("change", function () {
+        updateBalance(
+          "withdrawAccount",
+          "withdrawBalanceInfo",
+          "withdrawCurrentBalance"
+        );
+      });
 
     // Gestion de la soumission des formulaires
-    document.getElementById("depositForm").addEventListener("submit", handleSubmit);
-    document.getElementById("withdrawForm").addEventListener("submit", handleSubmit);
+    document
+      .getElementById("depositForm")
+      .addEventListener("submit", handleSubmit);
+    document
+      .getElementById("withdrawForm")
+      .addEventListener("submit", handleSubmit);
   });
 
   async function handleSubmit(e) {
-  e.preventDefault();
-  const form = e.target;
-  const isDeposit = form.id === "depositForm";
-  const typeTransaction = isDeposit ? "DEPOT" : "RETRAIT";
+    e.preventDefault();
+    const form = e.target;
+    const isDeposit = form.id === "depositForm";
+    const type_mouvement = isDeposit ? "DEPOT" : "RETRAIT";
+    const accountSelect = isDeposit ? "depositAccount" : "withdrawAccount";
+    const accountId = document.getElementById(accountSelect).value;
 
-  const formData = new FormData(form);
-  formData.append("type_mouvement", typeTransaction);
+    const formData = new FormData(form);
+    formData.append("type_mouvement", type_mouvement);
 
-  const accountId = formData.get("account"); // l’ID du compte
-  const url = `/GMyCom/tableau-bord/compte/transaction/operation/${accountId}/`;
+    try {
+      const response = await fetch(
+        `/GMyCom/tableau-bord/transaction/mouvement/${accountId}/`,
+        {
+          method: "POST",
+          body: formData,
+          headers: {
+            "X-Requested-With": "XMLHttpRequest", // Pour identifier les requêtes AJAX
+          },
+        }
+      );
 
-  try {
-    const response = await fetch(url, {
-      method: "POST",
-      body: formData,
-      headers: {
-        "X-CSRFToken": "{{ csrf_token }}",
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Erreur serveur");
       }
-    });
 
-    const data = await response.json();
-    showAlert(data.success, data.message);
+      showAlert(data.success, data.message);
 
-    if (data.success) {
-      form.reset();
-      const selectId = isDeposit ? "depositAccount" : "withdrawAccount";
-      updateBalance(selectId, `${selectId}BalanceInfo`, `${selectId}CurrentBalance`);
+      if (data.success) {
+        form.reset();
+        // Mettre à jour le solde affiché
+        const selectedOption = document.querySelector(
+          `#${accountSelect} option:checked`
+        );
+        if (selectedOption && data.new_balance) {
+          selectedOption.dataset.solde = data.new_balance;
+          updateBalance(
+            accountSelect,
+            `${accountSelect}BalanceInfo`,
+            `${accountSelect}CurrentBalance`
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Erreur:", error);
+      showAlert(
+        false,
+        error.message || "Une erreur est survenue lors de la transaction"
+      );
     }
-  } catch (error) {
-    console.error("Erreur:", error);
-    showAlert(false, "Une erreur est survenue lors de la transaction");
   }
-}
-
 
   function showAlert(isSuccess, message) {
     const alert = document.getElementById("alert");
     const alertMessage = document.getElementById("alertMessage");
-    
-    alert.className = `alert ${isSuccess ? "alert-success" : "alert-error"} show`;
+
+    alert.className = `alert ${
+      isSuccess ? "alert-success" : "alert-error"
+    } show`;
     alertMessage.textContent = message;
-    
+
     setTimeout(() => {
       alert.className = "alert";
     }, 5000);
   }
 </script>
-
 
 {%endblock%}

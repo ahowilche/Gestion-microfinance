@@ -321,7 +321,7 @@
             {% for compte in comptes %}
             <tr>
               <td class="account-number">{{ compte.numero_compte }}</td>
-              <td>{{ compte.client.nom_complet }}</td>
+              <td>{{ compte.client.nom}} {{ compte.client.prenom}}</td>
               <td>{{ compte.client.identifiant }}</td>
               <td>
                 <span class="badge {% if compte.type_compte == 'courant' %}badge-courant{% else %}badge-epargne{% endif %}">

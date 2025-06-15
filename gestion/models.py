@@ -1,7 +1,8 @@
-from django.db import models
-from django.utils import timezone
+from django.db import models, transaction
+from django.utils import timezone 
 import random
 from django.contrib.auth.models import AbstractUser
+from decimal import Decimal, InvalidOperation
 
 # =========================
 # AGENT UTILISATEUR
@@ -91,13 +92,14 @@ class Compte(models.Model):
 # MOUVEMENTS : DÉPÔT / RETRAIT
 # =========================
 
+
 class Mouvement(models.Model):
     TYPE_CHOICES = (
         ('DEPOT', 'Dépôt'),
         ('RETRAIT', 'Retrait'),
     )
 
-    compte = models.ForeignKey("Compte", on_delete=models.CASCADE)
+    compte = models.ForeignKey("Compte", on_delete=models.CASCADE, related_name="mouvements")
     agent = models.ForeignKey("Agent", on_delete=models.SET_NULL, null=True)
     type_mouvement = models.CharField(max_length=10, choices=TYPE_CHOICES)
     montant = models.DecimalField(max_digits=10, decimal_places=2)
@@ -105,6 +107,16 @@ class Mouvement(models.Model):
 
     def save(self, *args, **kwargs):
         is_new = self.pk is None
+
+        # Sécurité : garantir que le montant est bien un Decimal
+        if not isinstance(self.montant, Decimal):
+            try:
+                self.montant = Decimal(str(self.montant))
+            except InvalidOperation:
+                raise ValueError("Montant invalide")
+
+        if self.montant <= 0:
+            raise ValueError("Le montant doit être positif")
 
         with transaction.atomic():
             if is_new:
@@ -121,6 +133,8 @@ class Mouvement(models.Model):
 
     def __str__(self):
         return f"{self.type_mouvement} de {self.montant} sur {self.compte.numero_compte}"
+
+
 
 
 # =========================

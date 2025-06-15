@@ -10,7 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from django.views.generic import ListView
 
-from django.db import transaction
+
 from decimal import Decimal
 from django.views.generic import CreateView
 from django.urls import reverse_lazy
@@ -20,7 +20,8 @@ from django.contrib.messages.views import SuccessMessageMixin
 import json
 import random
 
-from .models import Agent, Client, Compte, Mouvement, Credit, Remboursement
+from .models import Agent, Client, Compte, Mouvement, Credit, Remboursement, HistoriqueTransaction
+from django.db import transaction
 
 
 def index(request):
@@ -240,8 +241,8 @@ class ListeComptesView(ListView):
         
         # Annoter avec les totaux de dépôts et retraits en utilisant le modèle Mouvement
         queryset = queryset.annotate(
-            total_depots=Sum('mouvement__montant', filter=Q(mouvement__type_mouvement='DEPOT')),
-            total_retraits=Sum('mouvement__montant', filter=Q(mouvement__type_mouvement='RETRAIT'))
+            total_depots=Sum('mouvements__montant', filter=Q(mouvements__type_mouvement='DEPOT')),
+            total_retraits=Sum('mouvements__montant', filter=Q(mouvements__type_mouvement='RETRAIT'))
         )
         
         return queryset.order_by('-date_creation')
@@ -260,74 +261,120 @@ class ListeComptesView(ListView):
         context['statut_filter'] = self.request.GET.get('statut', '')
         
         return context
-
     
 
 @login_required
 def effectuer_transaction(request):
     comptes = Compte.objects.select_related('client').all()
-    return render(request, "dashboard/section/transaction.html", {"comptes": comptes})
+    return render(request, 'dashboard/section/transaction.html', {
+        'comptes': comptes,
+    })
 
-@csrf_exempt
+
+@require_http_methods(["POST"])
 @login_required
-def process_transaction(request, compte_id):
-    if request.method == "POST":
+def effectuer_mouvement(request, compte_id):
+    try:
+        compte = get_object_or_404(Compte, id=compte_id)
+        agent = request.user
+
+        type_mouvement = request.POST.get("type_mouvement")
         try:
-            compte = get_object_or_404(Compte, id=compte_id)
+            montant = Decimal(str(request.POST.get("amount")))
+            if montant <= 0:
+                return JsonResponse({"success": False, "message": "Le montant doit être positif"}, status=400)
+        except (InvalidOperation, TypeError):
+            return JsonResponse({"success": False, "message": "Montant invalide"}, status=400)
 
-            type_mouvement = request.POST.get("type_mouvement")
-            montant_str = request.POST.get("amount")
-            description = request.POST.get("description", "")
+        if type_mouvement not in ["DEPOT", "RETRAIT"]:
+            return JsonResponse({"success": False, "message": "Type de mouvement invalide"}, status=400)
 
-            if not all([type_mouvement, montant_str]):
-                return JsonResponse({
-                    "success": False,
-                    "message": "Données manquantes"
-                }, status=400)
-
-            try:
-                montant = float(montant_str)
-                if montant <= 0:
-                    return JsonResponse({
-                        "success": False,
-                        "message": "Le montant doit être positif"
-                    }, status=400)
-            except ValueError:
-                return JsonResponse({
-                    "success": False,
-                    "message": "Montant invalide"
-                }, status=400)
-
-            # Création du mouvement (le modèle gère la validation et mise à jour du solde)
-            mouvement = Mouvement(
+        with transaction.atomic():
+            mouvement = Mouvement.objects.create(
                 compte=compte,
-                agent=request.user,
+                agent=agent,
                 type_mouvement=type_mouvement,
                 montant=montant,
-                date=timezone.now()
             )
 
-            mouvement.save()
+            # Historique
+            HistoriqueTransaction.objects.create(
+                compte=compte,
+                type_operation=type_mouvement,
+                montant=montant,
+                description=f"{type_mouvement} effectué par {agent.get_full_name()}"
+            )
 
-            return JsonResponse({
-                "success": True,
-                "message": f"{type_mouvement} réussi",
-                "new_balance": compte.solde
-            })
+        return JsonResponse({
+            "success": True,
+            "message": "Transaction effectuée avec succès",
+            "new_balance": str(compte.solde)
+        })
 
-        except ValueError as ve:
-            return JsonResponse({
-                "success": False,
-                "message": str(ve)
-            }, status=400)
+    except ValueError as e:
+        return JsonResponse({"success": False, "message": str(e)}, status=400)
+    except Exception as e:
+        return JsonResponse({"success": False, "message": "Erreur serveur : " + str(e)}, status=500)
 
-        except Exception as e:
-            return JsonResponse({
-                "success": False,
-                "message": f"Erreur serveur : {str(e)}"
-            }, status=500)
 
-    return JsonResponse({
-        "success": False,
-        "message": "Méthode non autorisée"
-    }, status=405)
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def octroyer_credit(request, compte_id):
+    try:
+        data = json.loads(request.body)
+        montant = Decimal(data.get("montant"))
+        taux_interet = Decimal(data.get("taux_interet"))
+        duree_mois = int(data.get("duree_mois"))
+        agent_id = data.get("agent_id")
+
+        compte = get_object_or_404(Compte, id=compte_id)
+        agent = get_object_or_404(Agent, id=agent_id)
+
+        credit = Credit.objects.create(
+            compte=compte,
+            agent=agent,
+            montant=montant,
+            taux_interet=taux_interet,
+            duree_mois=duree_mois
+        )
+
+        return JsonResponse({"success": True, "message": "Crédit octroyé."})
+
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=400)
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def rembourser_credit(request, credit_id):
+    try:
+        data = json.loads(request.body)
+        montant = Decimal(data.get("montant"))
+
+        credit = get_object_or_404(Credit, id=credit_id)
+
+        remboursement = Remboursement.objects.create(
+            credit=credit,
+            montant=montant
+        )
+
+        return JsonResponse({"success": True, "message": "Remboursement effectué."})
+
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=400)
+
+@require_http_methods(["GET"])
+def historique_transactions(request, compte_id):
+    compte = get_object_or_404(Compte, id=compte_id)
+    historiques = HistoriqueTransaction.objects.filter(compte=compte).order_by('-date')
+
+    data = [
+        {
+            "type_operation": h.type_operation,
+            "montant": str(h.montant),
+            "date": h.date.strftime("%Y-%m-%d %H:%M"),
+            "description": h.description
+        }
+        for h in historiques
+    ]
+    return JsonResponse({"historique": data})
