@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Sum, Q # <-- Assurez-vous que Sum est bien importé ici
+from django.db.models import Sum, Q, Count, F # <-- Assurez-vous que Sum est bien importé ici
 from django.utils.decorators import method_decorator
 
 from django.http import JsonResponse
@@ -26,6 +26,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 
 import json
 import random
+import io
 
 from django.views.decorators.http import require_GET
 from django.utils.dateparse import parse_date
@@ -37,6 +38,28 @@ from rest_framework.decorators import api_view, permission_classes # Importez ce
 from rest_framework.response import Response # Importez ceci
 from rest_framework import status # Importez ceci
 # from rest_framework.permissions import IsAuthenticated # Décommentez si vous utilisez l'authentification DRF
+
+
+from django.http import HttpResponse
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4, landscape
+from reportlab.lib import colors
+from reportlab.lib.units import inch
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
+from reportlab.lib.utils import ImageReader
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+from django.db.models.functions import TruncMonth
+plt.switch_backend('Agg') 
+
+
+
+
+
+
+
 
 
 print("--- DEBUG VIEWS.PY: Début du chargement du fichier views.py ---") # Pour le débogage de chargement
@@ -458,8 +481,7 @@ def get_credit_payments(request, credit_id):
     return JsonResponse(data, safe=False)
 
 # --- Fonction record_repayment (MODIFIÉE) ---
-@api_view(['POST']) # <-- **TRÈS IMPORTANT : Ajoute les fonctionnalités DRF**
-# @permission_classes([IsAuthenticated]) # <-- DÉCOMMENTEZ ET IMPORTEZ si l'utilisateur doit être authentifié via DRF
+@api_view(['POST'])
 @csrf_exempt # Continuez de l'utiliser si pas de jeton CSRF, mais à revoir pour la production !
 # @require_POST # Ce décorateur est redondant avec @api_view(['POST']) et peut être retiré.
 def record_repayment(request):
@@ -570,3 +592,671 @@ def record_repayment(request):
         traceback.print_exc() # Cela imprimera le traceback complet dans la console
         return Response({"error": f"Une erreur interne est survenue sur le serveur: {e}"},
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+  
+  
+  
+#########################################  RAPPORT  #######################################################""  
+
+
+
+def rapport(request):
+    return render(request, 'dashboard/section/rapport.html')
+
+try:
+    from gestion.models import Client, Compte, Credit, Remboursement, Mouvement, HistoriqueTransaction
+except ImportError:
+    print("ATTENTION : Les modèles Django n'ont pas pu être importés. Le rapport utilisera des données factices.")
+    class DummyModel:
+        objects = None
+    Client = DummyModel
+    Compte = DummyModel
+    Credit = DummyModel
+    Remboursement = DummyModel
+    Mouvement = DummyModel
+    HistoriqueTransaction = DummyModel
+
+# --- Styles pour les paragraphes ---
+styles = getSampleStyleSheet()
+
+styles['Normal'].fontName = 'Helvetica'
+styles['Normal'].fontSize = 10
+styles['Normal'].leading = 12
+
+styles.add(ParagraphStyle(name='ReportTitle', fontName='Helvetica-Bold', fontSize=24, spaceAfter=20, alignment=TA_CENTER))
+styles.add(ParagraphStyle(name='SectionTitle', fontName='Helvetica-Bold', fontSize=16, spaceBefore=20, spaceAfter=10, alignment=TA_LEFT))
+
+style_normal = styles['Normal']
+style_center = ParagraphStyle(name='NormalCenter', parent=styles['Normal'])
+style_center.alignment = TA_CENTER
+styles.add(style_center)
+
+style_right = ParagraphStyle(name='NormalRight', parent=styles['Normal'])
+style_right.alignment = TA_RIGHT
+styles.add(style_right)
+
+# Style pour le texte des cellules du tableau, avec une taille de police plus petite si nécessaire
+styles.add(ParagraphStyle(name='TableCellText', fontName='Helvetica', fontSize=8.5, leading=10, alignment=TA_LEFT))
+styles.add(ParagraphStyle(name='TableCellRight', fontName='Helvetica', fontSize=8.5, leading=10, alignment=TA_RIGHT))
+
+
+def generate_pdf_response(buffer, filename):
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{filename}.pdf"'
+    buffer.seek(0)
+    response.write(buffer.getvalue())
+    return response
+
+def create_chart_image(data, labels, title, chart_type='pie', colors=None):
+    buffer = io.BytesIO()
+    plt.figure(figsize=(6, 4))
+
+    if colors is None:
+        colors = plt.cm.Paired.colors
+
+    if chart_type == 'pie':
+        plt.pie(data, labels=labels, autopct='%1.1f%%', startangle=90, colors=colors)
+        plt.axis('equal')
+    elif chart_type == 'bar':
+        plt.bar(labels, data, color=colors if isinstance(colors, list) else 'skyblue')
+        plt.ylabel('Montant')
+        plt.xticks(rotation=45, ha='right')
+    
+    plt.title(title)
+    plt.tight_layout()
+    plt.savefig(buffer, format='png')
+    plt.close()
+    buffer.seek(0)
+    return buffer
+
+def rapport_resume_financier_pdf(request):
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=landscape(A4), rightMargin=inch, leftMargin=inch, topMargin=inch, bottomMargin=inch)
+    story = []
+
+    story.append(Paragraph("<b>RÉSUMÉ FINANCIER GLOBAL</b>", styles['ReportTitle']))
+    story.append(Paragraph(f"Date de Génération : {timezone.now().strftime('%Y-%m-%d %H:%M:%S')}", style_right))
+    story.append(Spacer(1, 0.4 * inch))
+
+    total_clients = 0
+    total_comptes = 0
+    total_solde_comptes = Decimal('0.00')
+    total_credits_octroyes = Decimal('0.00')
+    total_credits_rembourses = Decimal('0.00')
+    total_depots = Decimal('0.00')
+    total_retraits = Decimal('0.00')
+
+    try:
+        if Client.objects:
+            total_clients = Client.objects.count()
+        if Compte.objects:
+            total_comptes = Compte.objects.count()
+            total_solde_comptes = Compte.objects.aggregate(total=Sum('solde'))['total'] or Decimal('0.00')
+        if Credit.objects:
+            total_credits_octroyes = Credit.objects.aggregate(total=Sum('montant'))['total'] or Decimal('0.00')
+        if Remboursement.objects:
+            total_credits_rembourses = Remboursement.objects.aggregate(total=Sum('montant'))['total'] or Decimal('0.00')
+        if Mouvement.objects:
+            total_depots = Mouvement.objects.filter(type_mouvement='DEPOT').aggregate(total=Sum('montant'))['total'] or Decimal('0.00')
+            total_retraits = Mouvement.objects.filter(type_mouvement='RETRAIT').aggregate(total=Sum('montant'))['total'] or Decimal('0.00')
+    except AttributeError:
+        total_clients = 125
+        total_comptes = 200
+        total_solde_comptes = Decimal('1500000.00')
+        total_credits_octroyes = Decimal('850000.00')
+        total_credits_rembourses = Decimal('620000.00')
+        total_depots = Decimal('2100000.00')
+        total_retraits = Decimal('700000.00')
+        print("INFO : Utilisation de données factices pour le rapport financier car les modèles ne sont pas accessibles.")
+
+
+    story.append(Paragraph("<b>1. Métriques Clés</b>", styles['SectionTitle']))
+    data_metrics = [
+        ["Métrique", "Valeur"],
+        ["Total Clients", total_clients],
+        ["Total Comptes", total_comptes],
+        ["Solde Total des Comptes", f"{total_solde_comptes:,.2f} XOF".replace(',', ' ').replace('.', ',')],
+        ["Crédits Octroyés", f"{total_credits_octroyes:,.2f} XOF".replace(',', ' ').replace('.', ',')],
+        ["Crédits Remboursés", f"{total_credits_rembourses:,.2f} XOF".replace(',', ' ').replace('.', ',')],
+        ["Total Dépôts", f"{total_depots:,.2f} XOF".replace(',', ' ').replace('.', ',')],
+        ["Total Retraits", f"{total_retraits:,.2f} XOF".replace(',', ' ').replace('.', ',')],
+    ]
+    table_metrics_style = TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#2563eb')),
+        ('TEXTCOLOR', (0,0), (-1,0), colors.whitesmoke),
+        ('ALIGN', (0,0), (-1,0), 'CENTER'),
+        ('ALIGN', (1,1), (1,-1), 'RIGHT'),
+        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0,0), (-1,0), 10),
+        ('BOTTOMPADDING', (0,0), (-1,0), 12),
+        ('BACKGROUND', (0,1), (-1,-1), colors.HexColor('#e0f2fe')),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#93c5fd')),
+        ('BOX', (0,0), (-1,-1), 1, colors.HexColor('#1d4ed8')),
+        ('FONTNAME', (0,1), (-1,-1), 'Helvetica'),
+        ('FONTSIZE', (0,1), (-1,-1), 9),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('LEFTPADDING', (0,0), (-1,-1), 6),
+        ('RIGHTPADDING', (0,0), (-1,-1), 6),
+        ('TOPPADDING', (0,0), (-1,-1), 6),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+    ])
+    table_metrics = Table(data_metrics, colWidths=[3.5*inch, 3.5*inch])
+    table_metrics.setStyle(table_metrics_style)
+    story.append(table_metrics)
+    story.append(Spacer(1, 0.4 * inch))
+
+    story.append(Paragraph("<b>2. Répartition des Soldes par Type de Compte</b>", styles['SectionTitle']))
+    labels_solde = []
+    data_solde = []
+    try:
+        if Compte.objects:
+            solde_par_type = Compte.objects.values('type_compte').annotate(total_solde=Sum('solde'))
+            labels_solde = [item['type_compte'].capitalize() for item in solde_par_type]
+            data_solde = [float(item['total_solde']) for item in solde_par_type]
+    except AttributeError:
+        labels_solde = ['Épargne', 'Courant']
+        data_solde = [900000, 600000]
+        print("INFO : Utilisation de données factices pour le solde par type car les modèles ne sont pas accessibles.")
+
+    if data_solde:
+        chart_solde_buffer = create_chart_image(data_solde, labels_solde, "Solde par Type de Compte", 'pie', colors=['#3b82f6', '#10b981', '#f59e0b'])
+        img_solde = Image((chart_solde_buffer))
+        img_solde.width = 3.5 * inch
+        img_solde.height = 2.5 * inch
+        story.append(img_solde)
+    else:
+        story.append(Paragraph("Pas de données de solde de compte pour le graphique.", style_normal))
+    story.append(Spacer(1, 0.4 * inch))
+
+    story.append(Paragraph("<b>3. Comparaison des Dépôts et Retraits</b>", styles['SectionTitle']))
+    if total_depots > 0 or total_retraits > 0:
+        chart_mouvements_buffer = create_chart_image(
+            [float(total_depots), float(total_retraits)],
+            ['Dépôts', 'Retraits'],
+            "Dépôts vs Retraits",
+            'bar',
+            colors=['#10b981', '#ef4444']
+        )
+        img_mouvements = Image((chart_mouvements_buffer))
+        img_mouvements.width = 3.5 * inch
+        img_mouvements.height = 2.5 * inch
+        story.append(img_mouvements)
+    else:
+        story.append(Paragraph("Pas de données de mouvement pour le graphique.", style_normal))
+    story.append(Spacer(1, 0.4 * inch))
+
+    story.append(Paragraph("<b>4. Transactions Récentes</b>", styles['SectionTitle']))
+    recent_transactions = []
+    try:
+        if HistoriqueTransaction.objects:
+            recent_transactions = HistoriqueTransaction.objects.all().order_by('-date')[:10]
+    except AttributeError:
+        print("INFO : Utilisation de données factices pour les transactions récentes car le modèle n'est pas accessible.")
+        class DummyTransaction:
+            def __init__(self, date, type_op, montant, compte_num, description=""):
+                self.date = date
+                self.type_operation = type_op
+                self.montant = Decimal(montant)
+                self.compte = DummyAccount(compte_num)
+                self.description = description
+            def get_type_operation_display(self):
+                return self.type_operation.capitalize()
+        class DummyAccount:
+            def __init__(self, num):
+                self.numero_compte = num
+
+        recent_transactions = [
+            DummyTransaction(timezone.now() - datetime.timedelta(days=1), 'DEPOT', '50000.00', 'C-001', 'Dépôt client A'),
+            DummyTransaction(timezone.now() - datetime.timedelta(days=2), 'RETRAIT', '15000.00', 'C-002', 'Retrait client B'),
+            DummyTransaction(timezone.now() - datetime.timedelta(days=3), 'VIREMENT', '25000.00', 'C-001', 'Virement vers C-003'),
+            DummyTransaction(timezone.now() - datetime.timedelta(days=4), 'DEPOT', '10000.00', 'C-002', 'Dépôt client C'),
+        ]
+
+    if recent_transactions:
+        data_transactions = [
+            [
+                Paragraph("<b>Date</b>", style_center),
+                Paragraph("<b>Type</b>", style_center),
+                Paragraph("<b>Montant (XOF)</b>", style_center),
+                Paragraph("<b>Compte</b>", style_center),
+                Paragraph("<b>Description</b>", style_center)
+            ]
+        ]
+        for t in recent_transactions:
+            data_transactions.append([
+                Paragraph(t.date.strftime("%Y-%m-%d %H:%M"), styles['TableCellText']), # Date et heure combinées
+                Paragraph(t.get_type_operation_display(), styles['TableCellText']), # Utiliser un style pour le texte de cellule
+                Paragraph(f"{t.montant:,.2f}".replace(',', ' ').replace('.', ','), styles['TableCellRight']), # Montant aligné à droite
+                Paragraph(t.compte.numero_compte, styles['TableCellText']),
+                Paragraph(t.description or "N/A", styles['TableCellText']) # Appliquer le style ici
+            ])
+
+        # Largeurs de colonnes ajustées pour un A4 paysage
+        # Ajustez ces valeurs pour donner plus d'espace à la description et au type.
+        # La somme des largeurs doit être inférieure ou égale à la largeur de contenu disponible (page_width - leftMargin - rightMargin)
+        # Pour A4 paysage (11.69 pouces), si marges de 1 pouce, largeur dispo = 9.69 pouces
+        table_transactions = Table(data_transactions, colWidths=[
+            1.6*inch,  # Date (légèrement plus large pour date+heure)
+            1.2*inch,  # Type (élargie)
+            1.4*inch,  # Montant (légèrement élargie)
+            1.6*inch,  # Compte (légèrement élargie)
+            3.89*inch  # Description (beaucoup plus large)
+        ])
+        
+        table_transactions.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#0ea5e9')),
+            ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+            ('ALIGN', (0,0), (-1,0), 'CENTER'),
+            ('ALIGN', (2,1), (2,-1), 'RIGHT'), # Montant aligné à droite
+            ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0,0), (-1,0), 10),
+            ('BOTTOMPADDING', (0,0), (-1,0), 12),
+            ('BACKGROUND', (0,1), (-1,-1), colors.HexColor('#e0f2fe')),
+            ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#7dd3fc')),
+            ('BOX', (0,0), (-1,-1), 1, colors.HexColor('#0284c7')),
+            ('FONTNAME', (0,1), (-1,-1), 'Helvetica'), # Appliqué ici, mais mieux de le faire via ParagraphStyle
+            ('FONTSIZE', (0,1), (-1,-1), 9), # Appliqué ici, mais mieux de le faire via ParagraphStyle
+            ('VALIGN', (0,0), (-1,-1), 'TOP'), # Important pour le débordement de texte
+            ('LEFTPADDING', (0,0), (-1,-1), 4), # Réduire le padding si besoin d'espace
+            ('RIGHTPADDING', (0,0), (-1,-1), 4), # Réduire le padding si besoin d'espace
+            ('TOPPADDING', (0,0), (-1,-1), 4),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 4),
+        ]))
+        story.append(table_transactions)
+    else:
+        story.append(Paragraph("Aucune transaction récente à afficher.", style_normal))
+    story.append(Spacer(1, 0.4 * inch))
+
+
+    doc.build(story)
+    return generate_pdf_response(buffer, "Resume_Financier_Global")
+
+
+def rapport_clients_pdf(request):
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=landscape(A4), rightMargin=inch, leftMargin=inch, topMargin=inch, bottomMargin=inch)
+    story = []
+
+    story.append(Paragraph("<b>RAPPORT DES CLIENTS</b>", styles['ReportTitle']))
+    story.append(Spacer(1, 0.4 * inch))
+
+    clients = []
+    try:
+        if Client.objects:
+            clients = Client.objects.all().order_by('nom', 'prenom')
+    except AttributeError:
+        print("INFO : Utilisation de données factices pour les clients car le modèle n'est pas accessible.")
+        class DummyClient:
+            def __init__(self, identifiant, nom, prenom, tel, email, date_insc):
+                self.identifiant = identifiant
+                self.nom = nom
+                self.prenom = prenom
+                self.telephone = tel
+                self.email = email
+                self.date_inscription = date_insc
+            def comptes_count(self):
+                return 2
+        clients = [
+            DummyClient('CL001', 'Dupont', 'Jean', '0788123456', 'jean.dupont@example.com', timezone.now() - datetime.timedelta(days=300)),
+            DummyClient('CL002', 'Martin', 'Sophie', '0788654321', 'sophie.martin@example.com', timezone.now() - datetime.timedelta(days=150)),
+        ]
+
+    if not clients:
+        story.append(Paragraph("Aucun client trouvé.", style_normal))
+    else:
+        data = [
+            [
+                Paragraph("<b>Identifiant</b>", style_center),
+                Paragraph("<b>Nom Complet</b>", style_center),
+                Paragraph("<b>Téléphone</b>", style_center),
+                Paragraph("<b>Email</b>", style_center),
+                Paragraph("<b>Date Inscription</b>", style_center),
+                Paragraph("<b>Total Comptes</b>", style_center)
+            ]
+        ]
+        for client in clients:
+            total_comptes_client = 0
+            try:
+                total_comptes_client = client.comptes.count() 
+            except AttributeError:
+                total_comptes_client = client.comptes_count() 
+            
+            data.append([
+                Paragraph(client.identifiant, styles['TableCellText']),
+                Paragraph(f"{client.nom} {client.prenom}", styles['TableCellText']),
+                Paragraph(client.telephone, styles['TableCellText']),
+                Paragraph(client.email or "N/A", styles['TableCellText']),
+                Paragraph(client.date_inscription.strftime("%Y-%m-%d"), styles['TableCellText']),
+                Paragraph(str(total_comptes_client), styles['TableCellText'])
+            ])
+        
+        table = Table(data, colWidths=[1.2*inch, 2*inch, 1.5*inch, 2.5*inch, 1.2*inch, 1.1*inch])
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#16a34a')),
+            ('TEXTCOLOR', (0,0), (-1,0), colors.whitesmoke),
+            ('ALIGN', (0,0), (-1,0), 'CENTER'),
+            ('ALIGN', (5,1), (5,-1), 'CENTER'),
+            ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0,0), (-1,0), 10),
+            ('BOTTOMPADDING', (0,0), (-1,0), 12),
+            ('BACKGROUND', (0,1), (-1,-1), colors.HexColor('#dcfce7')),
+            ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#86efac')),
+            ('BOX', (0,0), (-1,-1), 1, colors.HexColor('#22c55e')),
+            ('FONTNAME', (0,1), (-1,-1), 'Helvetica'),
+            ('FONTSIZE', (0,1), (-1,-1), 9),
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+            ('LEFTPADDING', (0,0), (-1,-1), 6),
+            ('RIGHTPADDING', (0,0), (-1,-1), 6),
+            ('TOPPADDING', (0,0), (-1,-1), 6),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+        ]))
+        story.append(table)
+    
+    doc.build(story)
+    return generate_pdf_response(buffer, "Rapport_Clients")
+
+def rapport_transactions_pdf(request, client_id=None):
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=landscape(A4), rightMargin=inch, leftMargin=inch, topMargin=inch, bottomMargin=inch)
+    story = []
+
+    title_text = "<b>RAPPORT GLOBAL DES TRANSACTIONS</b>"
+    transactions = []
+
+    try:
+        if client_id:
+            if Client.objects:
+                try:
+                    client = Client.objects.get(pk=client_id)
+                    if HistoriqueTransaction.objects:
+                        transactions = HistoriqueTransaction.objects.filter(compte__client=client).order_by('-date')
+                    title_text = f"<b>RAPPORT DES TRANSACTIONS POUR {client.nom.upper()} {client.prenom.upper()}</b>"
+                except Client.DoesNotExist:
+                    transactions = []
+                    title_text = "<b>RAPPORT DES TRANSACTIONS (CLIENT INTROUVABLE)</b>"
+                    print(f"INFO : Client avec ID {client_id} non trouvé.")
+            else:
+                print(f"INFO : Modèle Client non accessible pour filtrer les transactions pour ID {client_id}.")
+                transactions = []
+        else:
+            if HistoriqueTransaction.objects:
+                transactions = HistoriqueTransaction.objects.all().order_by('-date')
+    except AttributeError:
+        transactions = []
+        print("INFO : Modèle HistoriqueTransaction non accessible. Pas de transactions réelles.")
+
+    if not transactions and not (client_id and "INTROUVABLE" in title_text):
+        class DummyTransaction:
+            def __init__(self, date, type_op, montant, compte_num, description=""):
+                self.date = date
+                self.type_operation = type_op
+                self.montant = Decimal(montant)
+                self.compte = DummyAccount(compte_num)
+                self.description = description
+            def get_type_operation_display(self):
+                return self.type_operation.capitalize()
+        class DummyAccount:
+            def __init__(self, num):
+                self.numero_compte = num
+        
+        transactions = [
+            DummyTransaction(timezone.now() - datetime.timedelta(hours=1), 'DEPOT', '100000.00', 'C-TXN-001', 'Dépôt initial effectué par Paul Koffi avec une très longue description pour tester le débordement'),
+            DummyTransaction(timezone.now() - datetime.timedelta(days=1), 'RETRAIT', '25000.00', 'C-TXN-002', 'Retrait cash au guichet automatique.'),
+            DummyTransaction(timezone.now() - datetime.timedelta(days=2), 'VIREMENT', '50000.00', 'C-TXN-001', 'Paiement fournisseur pour services rendus.'),
+            DummyTransaction(timezone.now() - datetime.timedelta(days=3), 'DEPOT', '30000.00', 'C-TXN-003', 'Remise chèque bancaire.'),
+            DummyTransaction(timezone.now() - datetime.timedelta(days=4), 'REMBOURSEMENT', '500.00', 'C-TXN-001', 'Remboursement crédit (REM-12345) - Principal: 500, Intérêts: 0.00 - Cette description est aussi très longue et doit déborder.'),
+        ]
+        if client_id:
+            transactions = [t for t in transactions if t.compte.numero_compte == f'C-TXN-{client_id}']
+            if not transactions:
+                title_text = f"<b>RAPPORT DES TRANSACTIONS POUR CLIENT ID {client_id} (Aucune transaction factice trouvée)</b>"
+            else:
+                title_text = f"<b>RAPPORT DES TRANSACTIONS POUR CLIENT ID {client_id} (Données factices)</b>"
+        else:
+            title_text = "<b>RAPPORT GLOBAL DES TRANSACTIONS (Données factices)</b>"
+
+
+    story.append(Paragraph(title_text, styles['ReportTitle']))
+    story.append(Spacer(1, 0.4 * inch))
+
+    if not transactions:
+        story.append(Paragraph("Aucune transaction trouvée pour cette sélection.", style_normal))
+    else:
+        # Données du tableau : on utilise Paragraph pour chaque cellule afin d'appliquer des styles spécifiques
+        # et permettre le retour à la ligne automatique pour les longues descriptions.
+        data = [
+            [
+                Paragraph("<b>Date</b>", style_center),
+                Paragraph("<b>Type</b>", style_center),
+                Paragraph("<b>Montant (XOF)</b>", style_center),
+                Paragraph("<b>Compte</b>", style_center),
+                Paragraph("<b>Description</b>", style_center)
+            ]
+        ]
+        for t in transactions:
+            data.append([
+                Paragraph(t.date.strftime("%Y-%m-%d %H:%M"), styles['TableCellText']), # Date et heure combinées
+                Paragraph(t.get_type_operation_display(), styles['TableCellText']), # Utiliser un style pour le texte de cellule
+                Paragraph(f"{t.montant:,.2f}".replace(',', ' ').replace('.', ','), styles['TableCellRight']), # Montant aligné à droite
+                Paragraph(t.compte.numero_compte, styles['TableCellText']),
+                Paragraph(t.description or "N/A", styles['TableCellText']) # Appliquer le style ici
+            ])
+        
+        # Largeurs de colonnes ajustées pour un A4 paysage (~9.69 pouces de largeur de contenu)
+        # Total des colWidths doit être proche de la largeur de contenu (A4 paysage: 11.69 - 2*1 = 9.69 pouces)
+        table = Table(data, colWidths=[
+            1.6*inch,  # Date (plus large pour date+heure)
+            1.2*inch,  # Type (élargie pour 'Remboursement' et autres)
+            1.4*inch,  # Montant (légèrement élargie)
+            1.6*inch,  # Compte (légèrement élargie)
+            3.89*inch  # Description (beaucoup plus large, pour absorber le débordement)
+        ])
+        
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#0ea5e9')), # Bleu ciel
+            ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+            ('ALIGN', (0,0), (-1,0), 'CENTER'),
+            ('ALIGN', (2,1), (2,-1), 'RIGHT'), # Montant aligné à droite
+            ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0,0), (-1,0), 10),
+            ('BOTTOMPADDING', (0,0), (-1,0), 12),
+            ('BACKGROUND', (0,1), (-1,-1), colors.HexColor('#e0f2fe')), # Bleu très clair
+            ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#7dd3fc')),
+            ('BOX', (0,0), (-1,-1), 1, colors.HexColor('#0284c7')),
+            # Les styles FONTNAME et FONTSIZE pour le corps du tableau sont mieux gérés via ParagraphStyle dans data
+            # ('FONTNAME', (0,1), (-1,-1), 'Helvetica'), 
+            # ('FONTSIZE', (0,1), (-1,-1), 9), 
+            ('VALIGN', (0,0), (-1,-1), 'TOP'), # Très important pour permettre au texte de s'étendre verticalement
+            ('LEFTPADDING', (0,0), (-1,-1), 4), # Réduire le padding si besoin d'espace
+            ('RIGHTPADDING', (0,0), (-1,-1), 4), # Réduire le padding si besoin d'espace
+            ('TOPPADDING', (0,0), (-1,-1), 4),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 4),
+        ]))
+        story.append(table)
+    
+    doc.build(story)
+    filename = f"Rapport_Transactions_{client_id}" if client_id else "Rapport_Global_Transactions"
+    return generate_pdf_response(buffer, filename)
+
+
+def rapport_credits_pdf(request, client_id=None):
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=landscape(A4), rightMargin=inch, leftMargin=inch, topMargin=inch, bottomMargin=inch)
+    story = []
+
+    title_text = "<b>RAPPORT GLOBAL DES CRÉDITS</b>"
+    credits = []
+
+    try:
+        if client_id:
+            if Client.objects:
+                try:
+                    client = Client.objects.get(pk=client_id)
+                    if Credit.objects:
+                        credits = Credit.objects.filter(compte__client=client).order_by('-date_octroi')
+                    title_text = f"<b>RAPPORT DES CRÉDITS POUR {client.nom.upper()} {client.prenom.upper()}</b>"
+                except Client.DoesNotExist:
+                    credits = []
+                    title_text = "<b>RAPPORT DES CRÉDITS (CLIENT INTROUVABLE)</b>"
+                    print(f"INFO : Client avec ID {client_id} non trouvé.")
+            else:
+                print(f"INFO : Modèle Client non accessible pour filtrer les crédits pour ID {client_id}.")
+                credits = []
+        else:
+            if Credit.objects:
+                credits = Credit.objects.all().order_by('-date_octroi')
+    except AttributeError:
+        credits = []
+        print("INFO : Modèle Credit non accessible. Pas de crédits réels.")
+
+    if not credits and not (client_id and "INTROUVABLE" in title_text):
+        class DummyCredit:
+            def __init__(self, num, montant, taux, duree, date_octroi, statut, montant_remb):
+                self.numero_credit = num
+                self.montant = Decimal(montant)
+                self.taux_interet = Decimal(taux)
+                self.duree_mois = duree
+                self.date_octroi = date_octroi
+                self.statut = statut
+                self.montant_rembourse = Decimal(montant_remb)
+
+        credits = [
+            DummyCredit('CRD-001', '100000.00', '5.0', 12, timezone.now() - datetime.timedelta(days=60), 'En Cours', '20000.00'),
+            DummyCredit('CRD-002', '250000.00', '7.5', 24, timezone.now() - datetime.timedelta(days=300), 'Remboursé', '250000.00'),
+            DummyCredit('CRD-003', '50000.00', '6.0', 6, timezone.now() - datetime.timedelta(days=10), 'En Cours', '0.00'),
+        ]
+        if client_id:
+            # Note: Cette logique de filtrage des crédits factices est simpliste.
+            # Elle ne fonctionnera que si le client_id correspond exactement à la fin du numéro de crédit factice.
+            credits = [c for c in credits if c.numero_credit.endswith(str(client_id))]
+            if not credits:
+                title_text = f"<b>RAPPORT DES CRÉDITS POUR CLIENT ID {client_id} (Aucun crédit factice trouvé)</b>"
+            else:
+                title_text = f"<b>RAPPORT DES CRÉDITS POUR CLIENT ID {client_id} (Données factices)</b>"
+        else:
+            title_text = "<b>RAPPORT GLOBAL DES CRÉDITS (Données factices)</b>"
+
+
+    story.append(Paragraph(title_text, styles['ReportTitle']))
+    story.append(Spacer(1, 0.4 * inch))
+
+    if not credits:
+        story.append(Paragraph("Aucun crédit trouvé pour cette sélection.", style_normal))
+    else:
+        data_credits = [
+            [
+                Paragraph("<b>Numéro Crédit</b>", style_center),
+                Paragraph("<b>Montant Octroyé (XOF)</b>", style_center),
+                Paragraph("<b>Taux (%)</b>", style_center),
+                Paragraph("<b>Durée (mois)</b>", style_center),
+                Paragraph("<b>Date Octroi</b>", style_center),
+                Paragraph("<b>Statut</b>", style_center),
+                Paragraph("<b>Montant Remboursé (XOF)</b>", style_center)
+            ]
+        ]
+        for credit in credits:
+            montant_remb = getattr(credit, 'montant_rembourse', Decimal('0.00')) 
+            data_credits.append([
+                Paragraph(credit.numero_credit, styles['TableCellText']),
+                Paragraph(f"{credit.montant:,.2f}".replace(',', ' ').replace('.', ','), styles['TableCellRight']),
+                Paragraph(f"{credit.taux_interet:.2f}", styles['TableCellRight']),
+                Paragraph(str(credit.duree_mois), styles['TableCellText']),
+                Paragraph(credit.date_octroi.strftime("%Y-%m-%d"), styles['TableCellText']),
+                Paragraph(credit.statut, styles['TableCellText']),
+                Paragraph(f"{montant_remb:,.2f}".replace(',', ' ').replace('.', ','), styles['TableCellRight'])
+            ])
+        
+        table_credits = Table(data_credits, colWidths=[1.5*inch, 1.2*inch, 0.8*inch, 0.8*inch, 1.2*inch, 1*inch, 1.8*inch])
+        table_credits.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#dc2626')),
+            ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+            ('ALIGN', (0,0), (-1,0), 'CENTER'),
+            ('ALIGN', (1,1), (1,-1), 'RIGHT'),
+            ('ALIGN', (2,1), (2,-1), 'RIGHT'),
+            ('ALIGN', (3,1), (3,-1), 'CENTER'),
+            ('ALIGN', (6,1), (6,-1), 'RIGHT'),
+            ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0,0), (-1,0), 10),
+            ('BOTTOMPADDING', (0,0), (-1,0), 12),
+            ('BACKGROUND', (0,1), (-1,-1), colors.HexColor('#fee2e2')),
+            ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#fca5a5')),
+            ('BOX', (0,0), (-1,-1), 1, colors.HexColor('#ef4444')),
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+            ('LEFTPADDING', (0,0), (-1,-1), 6),
+            ('RIGHTPADDING', (0,0), (-1,-1), 6),
+            ('TOPPADDING', (0,0), (-1,-1), 6),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+        ]))
+        story.append(table_credits)
+        story.append(Spacer(1, 0.4 * inch))
+
+        story.append(Paragraph("<b>Statut des Crédits</b>", styles['SectionTitle']))
+        labels_statut = []
+        data_statut = []
+        try:
+            if Credit.objects:
+                statut_counts = Credit.objects.values('statut').annotate(count=Count('statut')).order_by('statut')
+                labels_statut = [item['statut'] for item in statut_counts]
+                data_statut = [item['count'] for item in statut_counts]
+        except AttributeError:
+            labels_statut = ['En Cours', 'Remboursé', 'En Retard']
+            data_statut = [15, 8, 2]
+            print("INFO : Utilisation de données factices pour le statut des crédits car le modèle n'est pas accessible.")
+
+        if data_statut:
+            chart_statut_buffer = create_chart_image(data_statut, labels_statut, "Statut des Crédits", 'bar', colors=['#f59e0b', '#10b981', '#ef4444'])
+            img_statut = Image((chart_statut_buffer))
+            img_statut.width = 3.5 * inch
+            img_statut.height = 2.5 * inch
+            story.append(img_statut)
+        else:
+            story.append(Paragraph("Pas de données de statut de crédit pour le graphique.", style_normal))
+        story.append(Spacer(1, 0.4 * inch))
+
+        story.append(Paragraph("<b>Montant des Crédits Octroyés par Mois (sur les 12 derniers mois)</b>", styles['SectionTitle']))
+        
+        try:
+            end_date = timezone.now().date()
+            start_date = end_date - timedelta(days=365)
+
+            credits_monthly = Credit.objects.filter(
+                date_octroi__range=(start_date, end_date)
+            ).annotate(
+                month=TruncMonth('date_octroi')
+            ).values('month').annotate(
+                total_amount=Sum('montant')
+            ).order_by('month')
+
+            if credits_monthly:
+                months = [item['month'].strftime('%Y-%m') for item in credits_monthly]
+                amounts = [float(item['total_amount']) for item in credits_monthly]
+
+                plt.figure(figsize=(8, 4))
+                plt.plot(months, amounts, marker='o', linestyle='-', color='#8b5cf6')
+                plt.xlabel('Mois')
+                plt.ylabel('Montant Total des Crédits (XOF)')
+                plt.title('Tendances des Crédits Octroyés')
+                plt.xticks(rotation=45, ha='right')
+                plt.grid(True)
+                plt.tight_layout()
+                
+                chart_tendances_buffer = io.BytesIO()
+                plt.savefig(chart_tendances_buffer, format='png')
+                plt.close()
+                chart_tendances_buffer.seek(0)
+
+                img_tendances = Image((chart_tendances_buffer))
+                img_tendances.width = 5.5 * inch
+                img_tendances.height = 3.5 * inch
+                story.append(img_tendances)
+            else:
+                story.append(Paragraph("Pas de données de crédit suffisantes sur les 12 derniers mois pour le graphique de tendance.", style_normal))
+        except Exception as e:
+            story.append(Paragraph("Impossible de générer le graphique de tendance des crédits.", style_normal))
+            print("ERREUR Graphique de tendance :", str(e))
+
+
+    doc.build(story)
+    filename = f"Rapport_Credits_{client_id}" if client_id else "Rapport_Global_Credits"
+    return generate_pdf_response(buffer, filename)
+
