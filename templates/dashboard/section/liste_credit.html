@@ -1,5 +1,6 @@
-{%extends "../home.html"%}{%block content%}
+{% extends "../home.html" %} {% block content %}
 <style>
+  /* Votre CSS existant est conservé ici */
   * {
     margin: 0;
     padding: 0;
@@ -118,22 +119,22 @@
     font-weight: 500;
   }
 
-  .status-en-cours {
+  .status-EN_COURS {
     background-color: #dbeafe;
     color: #1e40af;
   }
 
-  .status-rembourse {
+  .status-REMBOURSE {
     background-color: #dcfce7;
     color: #166534;
   }
 
-  .status-annule {
+  .status-ANNULE {
     background-color: #fee2e2;
     color: #dc2626;
   }
 
-  .status-retard {
+  .status-EN_RETARD {
     background-color: #fef3c7;
     color: #d97706;
   }
@@ -157,124 +158,36 @@
     transition: width 0.3s ease;
   }
 
-  .modal {
-    display: none;
+  /* Styles pour la notification toast */
+  .toast {
+    visibility: hidden;
+    min-width: 250px;
+    margin-left: -125px; /* Centered */
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 8px;
+    padding: 16px;
     position: fixed;
     z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    left: 50%;
+    bottom: 30px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transition: opacity 0.5s, visibility 0.5s;
   }
 
-  .modal-content {
-    background-color: white;
-    margin: 5% auto;
-    padding: 0;
-    border-radius: 8px;
-    width: 90%;
-    max-width: 600px;
-    max-height: 90vh;
-    overflow-y: auto;
-  }
-
-  .modal-header {
-    padding: 20px 24px;
-    border-bottom: 1px solid #e5e7eb;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .modal-title {
-    font-size: 18px;
-    font-weight: 600;
-  }
-
-  .close {
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    color: #6b7280;
-  }
-
-  .modal-body {
-    padding: 24px;
-  }
-
-  .form-group {
-    margin-bottom: 20px;
-  }
-
-  label {
-    display: block;
-    font-weight: 500;
-    margin-bottom: 8px;
-    color: #374151;
-  }
-
-  .required {
-    color: #ef4444;
-  }
-
-  input,
-  select,
-  textarea {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    font-size: 14px;
-    transition: border-color 0.2s;
-  }
-
-  input:focus,
-  select:focus,
-  textarea:focus {
-    outline: none;
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-  }
-
-  .form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
-
-  @media (max-width: 768px) {
-    .container {
-      padding: 16px;
-    }
-
-    .header {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-
-    .credits-table {
-      font-size: 14px;
-    }
-
-    .form-row {
-      grid-template-columns: 1fr;
-    }
-
-    .modal-content {
-      margin: 10% auto;
-      width: 95%;
-    }
+  .toast.show {
+    visibility: visible;
+    opacity: 1;
   }
 </style>
 
 <div class="container">
   <div class="page-inner">
-    <!-- Welcome Section -->
     <section class="welcome-section">
-      <h2>Gestion des Crédits</h2>
-      <button class="btn btn-primary" onclick="openModal('addCreditModal')">
+      <h2>Liste des crédits</h2>
+      <a href="{% url 'nouveau_credit' %}" class="btn btn-primary">
         <svg
           width="16"
           height="16"
@@ -290,7 +203,7 @@
           ></path>
         </svg>
         Nouveau Crédit
-      </button>
+      </a>
     </section>
 
     <div class="card">
@@ -309,11 +222,14 @@
                 <th>Durée</th>
                 <th>Progression</th>
                 <th>Statut</th>
-                <th>Actions</th>
               </tr>
             </thead>
             <tbody id="creditsTableBody">
-              <!-- Les crédits seront ajoutés ici par JavaScript -->
+              <tr>
+                <td colspan="8" class="text-center">
+                  Chargement des crédits...
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -321,205 +237,113 @@
     </div>
   </div>
 
-  <!-- Modal Ajouter Crédit -->
-  <div id="addCreditModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title">Nouveau Crédit</h3>
-        <button class="close" onclick="closeModal('addCreditModal')">
-          &times;
-        </button>
-      </div>
-      <div class="modal-body">
-        <form id="addCreditForm">
-          <div class="form-group">
-            <label for="clientSelect"
-              >Client <span class="required">*</span></label
-            >
-            <select id="clientSelect" name="client" required>
-              <option value="">Sélectionner un client</option>
-              <option value="CLI001">Jean Dupont</option>
-              <option value="CLI002">Marie Martin</option>
-              <option value="CLI003">Pierre Durand</option>
-              <option value="CLI004">Sophie Leblanc</option>
-            </select>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="creditAmount"
-                >Montant (€) <span class="required">*</span></label
-              >
-              <input
-                type="number"
-                id="creditAmount"
-                name="amount"
-                step="100"
-                min="1000"
-                placeholder="10000"
-                required
-              />
-            </div>
-            <div class="form-group">
-              <label for="creditRate"
-                >Taux annuel (%) <span class="required">*</span></label
-              >
-              <input
-                type="number"
-                id="creditRate"
-                name="rate"
-                step="0.1"
-                min="0.1"
-                max="20"
-                placeholder="3.5"
-                required
-              />
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="creditDuration"
-                >Durée (mois) <span class="required">*</span></label
-              >
-              <input
-                type="number"
-                id="creditDuration"
-                name="duration"
-                min="6"
-                max="360"
-                placeholder="60"
-                required
-              />
-            </div>
-            <div class="form-group">
-              <label for="creditType"
-                >Type de crédit <span class="required">*</span></label
-              >
-              <select id="creditType" name="type" required>
-                <option value="personnel">Crédit Personnel</option>
-                <option value="immobilier">Crédit Immobilier</option>
-                <option value="auto">Crédit Auto</option>
-                <option value="consommation">Crédit Consommation</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="creditPurpose">Objet du crédit</label>
-            <textarea
-              id="creditPurpose"
-              name="purpose"
-              rows="3"
-              placeholder="Description de l'utilisation prévue du crédit..."
-            ></textarea>
-          </div>
-
-          <div
-            style="
-              display: flex;
-              justify-content: flex-end;
-              gap: 16px;
-              margin-top: 24px;
-            "
-          >
-            <button
-              type="button"
-              class="btn btn-outline"
-              onclick="closeModal('addCreditModal')"
-            >
-              Annuler
-            </button>
-            <button type="submit" class="btn btn-primary">
-              Créer le Crédit
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
+  <div id="toast" class="toast"></div>
+  {# Ajouté pour les notifications toast #}
 </div>
 
 <script>
-  // Données de test
-  const credits = [
-    {
-      id: "CRD001",
-      client: "Jean Dupont",
-      clientId: "CLI001",
-      amount: 50000,
-      rate: 3.5,
-      duration: 60,
-      type: "immobilier",
-      status: "en-cours",
-      startDate: "2024-01-15",
-      monthlyPayment: 905.15,
-      paidMonths: 8,
-      remainingAmount: 42000,
-    },
-    {
-      id: "CRD002",
-      client: "Marie Martin",
-      clientId: "CLI002",
-      amount: 15000,
-      rate: 4.2,
-      duration: 36,
-      type: "auto",
-      status: "en-cours",
-      startDate: "2024-02-01",
-      monthlyPayment: 445.5,
-      paidMonths: 6,
-      remainingAmount: 13200,
-    },
-    {
-      id: "CRD003",
-      client: "Pierre Durand",
-      clientId: "CLI003",
-      amount: 8000,
-      rate: 5.8,
-      duration: 24,
-      type: "personnel",
-      status: "rembourse",
-      startDate: "2022-06-01",
-      monthlyPayment: 354.2,
-      paidMonths: 24,
-      remainingAmount: 0,
-    },
-  ];
+  // --- Aide pour les notifications Toast ---
+  function showToast(message, isSuccess = true) {
+    let toast = document.getElementById("toast");
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.id = "toast";
+      toast.className = "toast";
+      document.body.appendChild(toast);
+    }
 
+    toast.textContent = message;
+    toast.style.backgroundColor = isSuccess ? "#4CAF50" : "#f44336"; // Vert pour le succès, rouge pour l'erreur
+    toast.className = "toast show"; // Ajoute la classe 'show' pour la rendre visible
+
+    setTimeout(() => {
+      toast.className = toast.className.replace("show", ""); // Retire la classe 'show' après 3 secondes
+    }, 3000);
+  }
+
+  // --- Fonctions de formatage ---
   function formatCurrency(amount) {
+    const numAmount = parseFloat(amount);
+    if (isNaN(numAmount)) {
+      return "N/A";
+    }
     return new Intl.NumberFormat("fr-FR", {
       style: "currency",
-      currency: "EUR",
-    }).format(amount);
+      currency: "XOF",
+    }).format(numAmount);
   }
 
   function getStatusBadge(status) {
     const statusLabels = {
-      "en-cours": "En cours",
-      rembourse: "Remboursé",
-      annule: "Annulé",
-      retard: "En retard",
+      EN_COURS: "En cours",
+      REMBOURSE: "Remboursé",
+      ANNULE: "Annulé",
+      EN_RETARD: "En retard",
     };
-    return `<span class="status-badge status-${status}">${statusLabels[status]}</span>`;
+    let className = "status-badge";
+    switch (status) {
+      case "EN_COURS":
+        className += " status-EN_COURS";
+        break;
+      case "REMBOURSE":
+        className += " status-REMBOURSE";
+        break;
+      case "ANNULE":
+        className += " status-ANNULE";
+        break;
+      case "EN_RETARD":
+        className += " status-EN_RETARD";
+        break;
+      default:
+        className += " status-secondary";
+    }
+    return `<span class="${className}">${
+      statusLabels[status] || status
+    }</span>`;
   }
 
-  function calculateProgress(paidMonths, totalDuration) {
-    return Math.round((paidMonths / totalDuration) * 100);
+  function calculateProgress(paidAmount, totalAmount) {
+    if (totalAmount <= 0) return 0;
+    return Math.round((paidAmount / totalAmount) * 100);
   }
 
-  function renderCreditsTable() {
+  // --- Affichage de la table des crédits (Récupération depuis l'API Django) ---
+  async function renderCreditsTable() {
     const tbody = document.getElementById("creditsTableBody");
-    tbody.innerHTML = credits
-      .map((credit) => {
-        const progress = calculateProgress(credit.paidMonths, credit.duration);
-        return `
+    tbody.innerHTML =
+      '<tr><td colspan="8" class="text-center">Chargement des crédits...</td></tr>';
+
+    try {
+      // Remplacez 'your_app_name' par le nom réel de votre application Django
+      const response = await fetch("{% url 'api_list_credits' %}");
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const credits = await response.json();
+
+      if (credits.length === 0) {
+        tbody.innerHTML =
+          '<tr><td colspan="8" class="text-center">Aucun crédit trouvé.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = credits
+        .map((credit) => {
+          const paidAmount = parseFloat(credit.montant_rembourse || 0);
+          const totalAmount = parseFloat(credit.montant);
+          const progress = calculateProgress(paidAmount, totalAmount);
+
+          return `
                     <tr>
-                        <td><strong>${credit.id}</strong></td>
-                        <td>${credit.client}</td>
-                        <td class="amount">${formatCurrency(credit.amount)}</td>
-                        <td>${credit.rate}%</td>
-                        <td>${credit.duration} mois</td>
+                        <td><strong>${credit.numero_credit}</strong></td>
+                        <td>${credit.client_nom_complet} (${
+            credit.numero_compte
+          })</td>
+                        <td class="amount">${formatCurrency(
+                          credit.montant
+                        )}</td>
+                        <td>${parseFloat(credit.taux_interet).toFixed(2)}%</td>
+                        <td>${credit.duree_mois} mois</td>
                         <td>
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <div class="progress-bar" style="flex: 1;">
@@ -528,154 +352,26 @@
                                 <span style="font-size: 12px; color: #6b7280;">${progress}%</span>
                             </div>
                         </td>
-                        <td>${getStatusBadge(credit.status)}</td>
-                        <td>
-                            <div style="display: flex; gap: 8px;">
-                                <button class="btn btn-outline btn-sm" onclick="viewCredit('${
-                                  credit.id
-                                }')">Détails</button>
-                                ${
-                                  credit.status === "en-cours"
-                                    ? `<button class="btn btn-outline btn-sm" onclick="addPayment('${credit.id}')">Remboursement</button>`
-                                    : ""
-                                }
-                            </div>
-                        </td>
+                        <td>${getStatusBadge(credit.statut)}</td>
                     </tr>
                 `;
-      })
-      .join("");
-  }
-
-  function openModal(modalId) {
-    document.getElementById(modalId).style.display = "block";
-  }
-
-  function closeModal(modalId) {
-    document.getElementById(modalId).style.display = "none";
-  }
-
-  function viewCredit(creditId) {
-    const credit = credits.find((c) => c.id === creditId);
-    if (credit) {
-      alert(
-        `Détails du crédit ${credit.id}:\n\nClient: ${
-          credit.client
-        }\nMontant: ${formatCurrency(credit.amount)}\nTaux: ${
-          credit.rate
-        }%\nDurée: ${credit.duration} mois\nMensualité: ${formatCurrency(
-          credit.monthlyPayment
-        )}\nMois payés: ${credit.paidMonths}/${
-          credit.duration
-        }\nRestant à payer: ${formatCurrency(credit.remainingAmount)}`
-      );
+        })
+        .join("");
+    } catch (error) {
+      console.error("Erreur lors du chargement des crédits:", error);
+      tbody.innerHTML =
+        '<tr><td colspan="8" class="text-center text-danger">Erreur lors du chargement des crédits.</td></tr>';
+      showToast("Impossible de charger la liste des crédits.", false);
     }
   }
 
-  function addPayment(creditId) {
-    const credit = credits.find((c) => c.id === creditId);
-    if (credit && credit.paidMonths < credit.duration) {
-      const amount = prompt(
-        `Montant du remboursement pour ${
-          credit.client
-        } (Mensualité normale: ${formatCurrency(credit.monthlyPayment)}):`
-      );
-      if (amount && !isNaN(amount) && parseFloat(amount) > 0) {
-        credit.paidMonths++;
-        credit.remainingAmount = Math.max(
-          0,
-          credit.remainingAmount - parseFloat(amount)
-        );
+  // --- Fonctions d'action (Détails, Remboursement) ---
+  // Ces fonctions utilisent actuellement des alertes. Vous devrez implémenter
+  // des points d'API Django pour ces actions et mettre à jour ces fonctions JavaScript.
 
-        if (
-          credit.paidMonths >= credit.duration ||
-          credit.remainingAmount <= 0
-        ) {
-          credit.status = "rembourse";
-          credit.remainingAmount = 0;
-        }
-
-        renderCreditsTable();
-        alert(
-          `Remboursement de ${formatCurrency(
-            parseFloat(amount)
-          )} enregistré pour ${credit.client}`
-        );
-      }
-    }
-  }
-
-  // Génération d'un numéro de crédit
-  function generateCreditNumber() {
-    const timestamp = Date.now().toString().slice(-6);
-    const random = Math.floor(Math.random() * 100)
-      .toString()
-      .padStart(2, "0");
-    return `CRD${timestamp}${random}`;
-  }
-
-  // Formulaire d'ajout de crédit
-  document
-    .getElementById("addCreditForm")
-    .addEventListener("submit", function (e) {
-      e.preventDefault();
-
-      const formData = new FormData(this);
-      const amount = parseFloat(formData.get("amount"));
-      const rate = parseFloat(formData.get("rate"));
-      const duration = parseInt(formData.get("duration"));
-
-      // Calcul de la mensualité (formule approximative)
-      const monthlyRate = rate / 100 / 12;
-      const monthlyPayment =
-        (amount * (monthlyRate * Math.pow(1 + monthlyRate, duration))) /
-        (Math.pow(1 + monthlyRate, duration) - 1);
-
-      const newCredit = {
-        id: generateCreditNumber(),
-        client:
-          formData.get("client") === "CLI001"
-            ? "Jean Dupont"
-            : formData.get("client") === "CLI002"
-            ? "Marie Martin"
-            : formData.get("client") === "CLI003"
-            ? "Pierre Durand"
-            : "Sophie Leblanc",
-        clientId: formData.get("client"),
-        amount: amount,
-        rate: rate,
-        duration: duration,
-        type: formData.get("type"),
-        status: "en-cours",
-        startDate: new Date().toISOString().split("T")[0],
-        monthlyPayment: monthlyPayment,
-        paidMonths: 0,
-        remainingAmount: amount,
-      };
-
-      credits.push(newCredit);
-      renderCreditsTable();
-      closeModal("addCreditModal");
-      this.reset();
-
-      alert(
-        `Crédit ${newCredit.id} créé avec succès!\nMensualité: ${formatCurrency(
-          monthlyPayment
-        )}`
-      );
-    });
-
-  // Fermer les modals en cliquant à l'extérieur
-  window.onclick = function (event) {
-    const modals = document.querySelectorAll(".modal");
-    modals.forEach((modal) => {
-      if (event.target === modal) {
-        modal.style.display = "none";
-      }
-    });
-  };
-
-  // Rendu initial
-  renderCreditsTable();
+  // --- Chargement initial : Afficher la table des crédits ---
+  document.addEventListener("DOMContentLoaded", () => {
+    renderCreditsTable();
+  });
 </script>
-{%endblock%}
+{% endblock %}

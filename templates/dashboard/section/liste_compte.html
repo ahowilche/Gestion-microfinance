@@ -266,7 +266,7 @@
     <section class="welcome-section">
       <div>
         <h2>Liste des Comptes</h2>
-        <p>{{ comptes.count }} compte{{ comptes.count|pluralize }} • Solde total: {{ solde_total|floatformat:2|intcomma }} €</p>
+        <p>{{ comptes.count }} compte{{ comptes.count|pluralize }} • Solde total: **{{ solde_total|floatformat:0|intcomma }} Fcfa**</p>
       </div>
       <a href="{% url 'effectuer_transaction' %}" class="btn btn-primary">
         <span class="icon">+</span>
@@ -329,13 +329,13 @@
                 </span>
               </td>
               <td class="text-right {% if compte.solde < 0 %}balance negative{% else %}balance{% endif %}">
-                {{ compte.solde|floatformat:2|intcomma }} €
+                {{ compte.solde|floatformat:0|intcomma }} Fcfa
               </td>
               <td class="text-right amount-positive">
-                {{ compte.total_depots|default:0|floatformat:2|intcomma }} €
+                {{ compte.total_depots|default:0|floatformat:0|intcomma }} Fcfa
               </td>
               <td class="text-right amount-negative">
-                {{ compte.total_retraits|default:0|floatformat:2|intcomma }} €
+                {{ compte.total_retraits|default:0|floatformat:0|intcomma }} Fcfa
               </td>
             </tr>
             {% empty %}
@@ -348,7 +348,6 @@
       </div>
     </div>
 
-    <!-- Pagination -->
     {% if is_paginated %}
     <div class="pagination">
       {% if page_obj.has_previous %}
@@ -366,6 +365,7 @@
     {% endif %}
   </div>
 </div>
+
 
 <script>
 // Fonctionnalité de recherche côté client pour une meilleure réactivité

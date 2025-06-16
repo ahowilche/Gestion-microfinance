@@ -81,9 +81,7 @@
           <div class="sidebar-content">
             <ul class="nav nav-secondary">
               <li class="nav-item">
-                <a
-                  href="{%url 'dashboard'%}"
-                >
+                <a href="{%url 'dashboard'%}">
                   <i class="fas fa-home"></i>
                   <p>Tableau de bord</p>
                 </a>
@@ -145,7 +143,7 @@
                       </a>
                     </li>
                     <li>
-                      <a href="">
+                      <a href="{%url 'historique_page'%}">
                         <span class="sub-item">Historique de transaction</span>
                       </a>
                     </li>
@@ -161,12 +159,12 @@
                 <div class="collapse" id="tables">
                   <ul class="nav nav-collapse">
                     <li>
-                      <a href="">
+                      <a href="{%url 'liste_credit'%}">
                         <span class="sub-item">liste des crédits</span>
                       </a>
                     </li>
                     <li>
-                      <a href="">
+                      <a href="{%url 'nouveau_credit'%}">
                         <span class="sub-item">enregistrer un crédit</span>
                       </a>
                     </li>
@@ -174,7 +172,7 @@
                 </div>
               </li>
               <li class="nav-item">
-                <a data-bs-toggle="collapse" href="#maps">
+                <a href="{%url 'page_remboursement'%}">
                   <i class="fas fa-map-marker-alt"></i>
                   <p>remboursement</p>
                 </a>
@@ -196,7 +194,6 @@
           <div class="main-header-logo">
             <!-- Logo Header -->
             <div class="logo-header" data-background-color="dark">
-              
               <div class="nav-toggle">
                 <button class="btn btn-toggle toggle-sidebar">
                   <i class="gg-menu-right"></i>
@@ -342,7 +339,9 @@
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="#">Account Setting</a>
                         <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="{% url 'logout' %}">Déconnexion</a>
+                        <a class="dropdown-item" href="{% url 'logout' %}"
+                          >Déconnexion</a
+                        >
                       </li>
                     </div>
                   </ul>
@@ -382,7 +381,6 @@
     <!-- Chart JS -->
     <script src="{%static 'assets_table/js/plugin/chart.js/chart.min.js'%}"></script>
 
-
     <!-- Chart Circle -->
     <script src="{%static 'assets_table/js/plugin/chart-circle/circles.min.js'%}"></script>
 
@@ -407,6 +405,5 @@
     <script src="{%static 'assets_table/js/demo.js'%}"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
   </body>
 </html>

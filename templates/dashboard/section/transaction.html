@@ -379,12 +379,12 @@
             >
               <h3>Solde actuel</h3>
               <div id="depositCurrentBalance" class="balance-amount">
-                0,00 €
+                0
               </div>
             </div>
             <div class="form-group">
               <label for="depositAmount"
-                >Montant (€) <span class="required">*</span></label
+                >Montant <span class="required">*</span></label
               >
               <input
                 type="number"
@@ -433,12 +433,12 @@
             >
               <h3>Solde actuel</h3>
               <div id="withdrawCurrentBalance" class="balance-amount">
-                0,00 €
+                0
               </div>
             </div>
             <div class="form-group">
               <label for="withdrawAmount"
-                >Montant (€) <span class="required">*</span></label
+                >Montant <span class="required">*</span></label
               >
               <input
                 type="number"
@@ -480,9 +480,7 @@
   function formatCurrency(amount) {
     return new Intl.NumberFormat("fr-FR", {
       style: "currency",
-      currency: "EUR",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+      currency: "XOF",
     }).format(amount);
   }
 

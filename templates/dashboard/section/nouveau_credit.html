@@ -1,105 +1,141 @@
-      <div class="modal-body">
-        <form id="addCreditForm">
+{% extends "../home.html" %}
+{% block content %}
+<div class="container">
+  <div class="page-inner">
+    <section class="welcome-section">
+      <h2>Ajouter un nouveau crédit</h2>
+      <p>Saisissez les informations de la demande</p>
+    </section>
+
+    <div class="card">
+      <form id="addCreditForm" method="post"> 
+        {% csrf_token %} 
+
+        <div class="form-group">
+          <label for="clientSelect">Client <span class="required">*</span></label>
+          <select id="clientSelect" name="compte" required> 
+            <option value="">Sélectionner un client</option>
+            {% for compte in comptes %} 
+              <option value="{{ compte.id }}">{{ compte.client.nom }} {{ compte.client.prenom }} ({{ compte.numero_compte }})</option> {# Assuming Compte has a 'client' and 'numero_compte' #}
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-row">
           <div class="form-group">
-            <label for="clientSelect"
-              >Client <span class="required">*</span></label
-            >
-            <select id="clientSelect" name="client" required>
-              <option value="">Sélectionner un client</option>
-              <option value="CLI001">Jean Dupont</option>
-              <option value="CLI002">Marie Martin</option>
-              <option value="CLI003">Pierre Durand</option>
-              <option value="CLI004">Sophie Leblanc</option>
-            </select>
+            <label for="creditAmount">Montant <span class="required">*</span></label>
+            <input
+              type="number"
+              id="creditAmount"
+              name="montant" {# Name should match your model field 'montant' #}
+              step="100"
+              min="1000"
+              placeholder="10000"
+              required
+            />
           </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="creditAmount"
-                >Montant (€) <span class="required">*</span></label
-              >
-              <input
-                type="number"
-                id="creditAmount"
-                name="amount"
-                step="100"
-                min="1000"
-                placeholder="10000"
-                required
-              />
-            </div>
-            <div class="form-group">
-              <label for="creditRate"
-                >Taux annuel (%) <span class="required">*</span></label
-              >
-              <input
-                type="number"
-                id="creditRate"
-                name="rate"
-                step="0.1"
-                min="0.1"
-                max="20"
-                placeholder="3.5"
-                required
-              />
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="creditDuration"
-                >Durée (mois) <span class="required">*</span></label
-              >
-              <input
-                type="number"
-                id="creditDuration"
-                name="duration"
-                min="6"
-                max="360"
-                placeholder="60"
-                required
-              />
-            </div>
-            <div class="form-group">
-              <label for="creditType"
-                >Type de crédit <span class="required">*</span></label
-              >
-              <select id="creditType" name="type" required>
-                <option value="personnel">Crédit Personnel</option>
-                <option value="immobilier">Crédit Immobilier</option>
-                <option value="auto">Crédit Auto</option>
-                <option value="consommation">Crédit Consommation</option>
-              </select>
-            </div>
-          </div>
-
           <div class="form-group">
-            <label for="creditPurpose">Objet du crédit</label>
-            <textarea
-              id="creditPurpose"
-              name="purpose"
-              rows="3"
-              placeholder="Description de l'utilisation prévue du crédit..."
-            ></textarea>
+            <label for="creditRate">Taux annuel (%) <span class="required">*</span></label>
+            <input
+              type="number"
+              id="creditRate"
+              name="taux_interet" {# Name should match your model field 'taux_interet' #}
+              step="0.1"
+              min="0.1"
+              max="20"
+              placeholder="3.5"
+              required
+            />
           </div>
+          <div class="form-group">
+            <label for="creditDuration">Durée (mois) <span class="required">*</span></label>
+            <input
+              type="number"
+              id="creditDuration"
+              name="duree_mois" {# Name should match your model field 'duree_mois' #}
+              min="6"
+              max="360"
+              placeholder="60"
+              required
+            />
+          </div>
+        </div>
 
-          <div
-            style="
-              display: flex;
-              justify-content: flex-end;
-              gap: 16px;
-              margin-top: 24px;
-            "
+        <div style="display: flex; justify-content: flex-end; gap: 16px; margin: 24px;">
+          <button
+            type="button"
+            class="btn btn-outline"
+            onclick="closeModal('addCreditModal')" {# Keep this if you have a modal context #}
           >
-            <button
-              type="button"
-              class="btn btn-outline"
-              onclick="closeModal('addCreditModal')"
-            >
-              Annuler
-            </button>
-            <button type="submit" class="btn btn-primary">
-              Créer le Crédit
-            </button>
-          </div>
-        </form>
+            Annuler
+          </button>
+          <button type="submit" class="btn btn-primary">Créer le Crédit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast">
+  <span id="toastMessage"></span>
+</div>
+
+
+<script>
+    // Function to show toast messages
+    function showToast(message, isSuccess = true) {
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+        toastMessage.textContent = message;
+        
+        if (isSuccess) {
+            toast.style.backgroundColor = '#4CAF50'; // Green for success
+        } else {
+            toast.style.backgroundColor = '#f44336'; // Red for error
+        }
+
+        toast.className = 'toast show';
+        setTimeout(() => {
+            toast.className = toast.className.replace('show', '');
+        }, 3000); // Hide after 3 seconds
+    }
+
+    document.getElementById('addCreditForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent default form submission
+
+        const formData = new FormData(this);
+        const data = {};
+        formData.forEach((value, key) => {
+            data[key] = value;
+        });
+
+        // Get CSRF token from the form
+        const csrftoken = formData.get('csrfmiddlewaretoken');
+
+        fetch("{% url 'create_credit_api' %}", { 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken, // Include CSRF token in headers
+            },
+            body: JSON.stringify(data),
+        })
+        .then(response => response.json().then(json => ({ status: response.status, body: json })))
+        .then(({ status, body }) => {
+            if (status >= 200 && status < 300) {
+                showToast(body.message || 'Crédit créé avec succès !', true);
+                // Optionally, clear the form or redirect
+                document.getElementById('addCreditForm').reset();
+            } else {
+                showToast(body.error || 'Erreur lors de la création du crédit.', false);
+                console.error('Error:', body.errors || body.error);
+            }
+        })
+        .catch(error => {
+            console.error('Network or parsing error:', error);
+            showToast('Une erreur inattendue est survenue.', false);
+        });
+    });
+</script>
+
+{% endblock %}

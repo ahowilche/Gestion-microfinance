@@ -1,6 +1,7 @@
 from django.db import models, transaction
 from django.utils import timezone 
 import random
+import datetime
 from django.contrib.auth.models import AbstractUser
 from decimal import Decimal, InvalidOperation
 
@@ -134,62 +135,6 @@ class Mouvement(models.Model):
     def __str__(self):
         return f"{self.type_mouvement} de {self.montant} sur {self.compte.numero_compte}"
 
-
-
-
-# =========================
-# CRÉDIT
-# =========================
-class Credit(models.Model):
-    compte = models.ForeignKey(Compte, on_delete=models.CASCADE)
-    agent = models.ForeignKey(Agent, on_delete=models.SET_NULL, null=True)
-    montant = models.DecimalField(max_digits=12, decimal_places=2)
-    taux_interet = models.DecimalField(max_digits=5, decimal_places=2)
-    duree_mois = models.PositiveIntegerField()
-    date_octroi = models.DateField(default=timezone.now)
-    statut = models.CharField(max_length=20, default='EN_COURS')
-
-    def __str__(self):
-        return f"Crédit {self.montant} sur {self.compte}"
-
-    def save(self, *args, **kwargs):
-        is_new = self.pk is None
-        super().save(*args, **kwargs)
-        if is_new:
-            HistoriqueTransaction.objects.create(
-                compte=self.compte,
-                type_operation="CREDIT",
-                montant=self.montant,
-                description="Crédit octroyé"
-            )
-
-
-# =========================
-# REMBOURSEMENT DE CRÉDIT
-# =========================
-class Remboursement(models.Model):
-    credit = models.ForeignKey(Credit, on_delete=models.CASCADE)
-    montant = models.DecimalField(max_digits=10, decimal_places=2)
-    date = models.DateField(default=timezone.now)
-
-    def __str__(self):
-        return f"Remboursement de {self.montant} le {self.date}"
-
-    def save(self, *args, **kwargs):
-        is_new = self.pk is None
-        super().save(*args, **kwargs)
-        if is_new:
-            compte = self.credit.compte
-            compte.solde -= self.montant
-            compte.save()
-            HistoriqueTransaction.objects.create(
-                compte=compte,
-                type_operation="REMBOURSEMENT",
-                montant=self.montant,
-                description="Remboursement crédit"
-            )
-
-
 # =========================
 # HISTORIQUE DES TRANSACTIONS
 # =========================
@@ -208,3 +153,109 @@ class HistoriqueTransaction(models.Model):
 
     def __str__(self):
         return f"{self.type_operation} de {self.montant} sur {self.compte.numero_compte}"
+
+
+# =========================
+# CRÉDIT
+# =========================
+class Credit(models.Model):
+    compte = models.ForeignKey(Compte, on_delete=models.CASCADE)
+    agent = models.ForeignKey(Agent, on_delete=models.SET_NULL, null=True)
+    montant = models.DecimalField(max_digits=12, decimal_places=2)
+    taux_interet = models.DecimalField(max_digits=5, decimal_places=2)
+    duree_mois = models.PositiveIntegerField()
+    date_octroi = models.DateField(default=timezone.now)
+    statut = models.CharField(max_length=20, default='EN_COURS')
+    montant_rembourse = models.DecimalField(
+        max_digits=12, # Ajustez la taille maximale si vos montants peuvent être très grands
+        decimal_places=2,
+        default=Decimal('0.00'), # Très important pour les calculs et éviter les valeurs None
+        help_text="Montant total déjà remboursé pour ce crédit."
+    )
+    # New field for credit number
+    numero_credit = models.CharField(max_length=50, unique=True, editable=False)
+
+    def __str__(self):
+        return f"Crédit {self.numero_credit} - {self.montant} sur {self.compte}"
+
+    def save(self, *args, **kwargs):
+        if not self.numero_credit:
+            # Generate a credit number based on timestamp (e.g., CR-YYYYMMDDHHMMSS-milliseconds)
+            timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S%f")
+            self.numero_credit = f"CR-{timestamp}"
+        
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+        if is_new:
+            HistoriqueTransaction.objects.create(
+                compte=self.compte,
+                type_operation="CREDIT",
+                montant=self.montant,
+                description=f"Crédit octroyé (Numéro: {self.numero_credit})"
+            )
+            # 2. Mise à jour du solde du compte   # Assurez-vous que votre modèle Compte a un champ 'solde'
+            self.compte.solde += self.montant
+            self.compte.save()
+
+# =========================
+# REMBOURSEMENT DE CRÉDIT
+# =========================
+
+class Remboursement(models.Model):
+    credit = models.ForeignKey(Credit, on_delete=models.CASCADE, related_name="remboursements")
+    agent = models.ForeignKey(Agent, on_delete=models.SET_NULL, null=True, blank=True) # Agent qui a enregistré
+    montant = models.DecimalField(max_digits=10, decimal_places=2)
+    montant_principal = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00')) # Part du capital
+    montant_interet = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00')) # Part des intérêts
+    date = models.DateTimeField(default=timezone.now) # Changement de DateField à DateTimeField
+    numero_remboursement = models.CharField(max_length=50, unique=True, editable=False) # Référence unique
+    methode_paiement = models.CharField(max_length=50, default="INCONNU") # Ajoutez ceci
+    reference = models.CharField(max_length=100, blank=True, null=True) # Ajoutez ceci si ce n'est pas numero_remboursement
+    notes = models.TextField(blank=True, null=True) # Ajoutez ceci
+
+
+    def __str__(self):
+        return f"Remboursement {self.numero_remboursement} de {self.montant} sur {self.credit} le {self.date.strftime('%Y-%m-%d %H:%M')}"
+
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+
+        if not self.numero_remboursement:
+            timestamp = timezone.now().strftime("%Y%m%d%H%M%S%f")
+            self.numero_remboursement = f"REM-{timestamp}"
+
+        if is_new:
+            if self.montant_principal in [None, '']:
+                self.montant_principal = Decimal('0.00')
+            if self.montant_interet in [None, '']:
+                self.montant_interet = Decimal('0.00')
+            if self.montant_principal == Decimal('0.00') and self.montant_interet == Decimal('0.00'):
+                self.montant_principal = self.montant
+
+        if Decimal(self.montant_principal) + Decimal(self.montant_interet) != self.montant:
+            raise ValueError("La somme du principal et des intérêts ne correspond pas au montant total du remboursement.")
+
+        if self.montant <= 0:
+            raise ValueError("Le montant du remboursement doit être positif.")
+
+        with transaction.atomic():
+            super().save(*args, **kwargs)
+
+            if is_new:
+                compte = self.credit.compte
+                from django.db.models import F
+                compte.solde = F('solde') - self.montant
+                compte.save(update_fields=['solde'])
+
+                HistoriqueTransaction.objects.create(
+                    compte=compte,
+                    type_operation="REMBOURSEMENT",
+                    montant=self.montant,
+                    description=f"Remboursement crédit ({self.numero_remboursement}) - Principal: {self.montant_principal}, Intérêts: {self.montant_interet}"
+                )
+        remboursements_total = self.credit.remboursements.aggregate(
+            total=models.Sum('montant'))['total'] or Decimal('0.00')
+
+        if remboursements_total >= self.credit.montant:
+            self.credit.statut = 'REMBOURSE'
+            self.credit.save(update_fields=['statut'])

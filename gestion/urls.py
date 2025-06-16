@@ -25,12 +25,23 @@ urlpatterns = [
     path('GMyCom/tableau-bord/transaction/', views.effectuer_transaction, name='effectuer_transaction'),
     path('GMyCom/tableau-bord/transaction/mouvement/<int:compte_id>/', views.effectuer_mouvement, name='effectuer_mouvement'),
 
-    # Crédit
-    path('GMyCom/tableau-bord/transaction/credit/<int:compte_id>/', views.octroyer_credit, name='octroyer_credit'),
-
-    # Remboursement de crédit
-    path('GMyCom/tableau-bord/transaction/remboursement/<int:credit_id>/', views.rembourser_credit, name='rembourser_credit'),
 
     # Historique des transactions
-    path('GMyCom/tableau-bord/transaction/historique/<int:compte_id>/', views.historique_transactions, name='historique_transactions'),
+    path('GMyCom/tableau-bord/transaction-data/', views.transactions_data, name='historique_transactions'),
+    path('GMyCom/tableau-bord/transaction/historique/', views.historique_page, name='historique_page'),
+    
+    
+    # Crédit
+    path('GMyCom/tableau-bord/credits/ajouter/', views.ajouter_credit, name='nouveau_credit'),
+    path('GMyCom/tableau-bord/credits/creer/', views.create_credit_api, name='create_credit_api'),
+    path('GMyCom/tableau-bord/credits/liste/', views.liste_credits, name='liste_credit'),
+
+    # API endpoints for AJAX calls
+    path('GMyCom/tableau-bord/credits/api/liste/', views.api_list_credits, name='api_list_credits'),
+    
+    #payement
+    path('GMyCom/tableau-bord/remboursement/', views.remboursement, name ='page_remboursement'),
+    path('GMyCom/tableau-bord/remboursement/api/credits/<int:credit_id>/payments/', views.get_credit_payments, name='api_get_credit_payments'),
+    path('GMyCom/tableau-bord/remboursement/api/repayments/record/', views.record_repayment, name='api_record_repayment'),
 ]
+
