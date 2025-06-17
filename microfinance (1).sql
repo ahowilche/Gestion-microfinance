@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1
--- Généré le : mar. 10 juin 2025 à 21:26
+-- Généré le : mar. 17 juin 2025 à 07:58
 -- Version du serveur : 10.4.28-MariaDB
 -- Version de PHP : 8.1.17
 
@@ -132,6 +132,17 @@ CREATE TABLE `django_admin_log` (
   `user_id` bigint(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Déchargement des données de la table `django_admin_log`
+--
+
+INSERT INTO `django_admin_log` (`id`, `action_time`, `object_id`, `object_repr`, `action_flag`, `change_message`, `content_type_id`, `user_id`) VALUES
+(19, '2025-06-16 23:04:59.577432', '2', 'Paul Koffi', 3, '', 6, 5),
+(20, '2025-06-16 23:08:28.038983', '6', 'agent1', 1, '[{\"added\": {}}]', 6, 5),
+(21, '2025-06-16 23:09:24.389532', '6', 'KOUASSI PIERRE', 2, '[{\"changed\": {\"fields\": [\"First name\", \"Last name\", \"Email address\"]}}]', 6, 5),
+(22, '2025-06-17 02:25:50.413962', '6', 'KOUASSI PIERRE', 3, '', 6, 5),
+(23, '2025-06-17 03:16:52.425923', '31', 'mari Koffi (ID7555219)', 1, '[{\"added\": {}}]', 7, 5);
+
 -- --------------------------------------------------------
 
 --
@@ -203,7 +214,21 @@ INSERT INTO `django_migrations` (`id`, `app`, `name`, `applied`) VALUES
 (20, 'gestion', '0002_client_prenom', '2025-05-24 17:10:57.172588'),
 (21, 'gestion', '0003_historiquetransaction_mouvement_and_more', '2025-06-04 18:45:55.679312'),
 (22, 'gestion', '0004_client_agent_credit_agent_mouvement_agent', '2025-06-04 22:16:41.777880'),
-(23, 'gestion', '0005_client_identifiant_alter_compte_client', '2025-06-10 15:26:53.110458');
+(23, 'gestion', '0005_client_identifiant_alter_compte_client', '2025-06-10 15:26:53.110458'),
+(24, 'gestion', '0006_compte_type_compte', '2025-06-14 01:09:06.252623'),
+(25, 'gestion', '0007_alter_client_adresse', '2025-06-14 16:42:44.269259'),
+(26, 'gestion', '0008_alter_mouvement_compte', '2025-06-15 17:38:20.610764'),
+(27, 'gestion', '0009_credit_numero_credit', '2025-06-15 22:05:42.323578'),
+(28, 'gestion', '0010_remboursement_agent_remboursement_methode_paiement_and_more', '2025-06-16 09:03:22.328192'),
+(29, 'gestion', '0011_credit_montant_rembourse', '2025-06-16 13:49:12.604325'),
+(30, 'gestion', '0012_alter_agent_role', '2025-06-16 21:46:07.466647'),
+(31, 'gestion', '0013_alter_client_agent_alter_compte_client', '2025-06-16 23:56:04.679635'),
+(32, 'gestion', '0014_historiquetransaction_agent_alter_compte_client', '2025-06-17 00:33:19.526303'),
+(33, 'gestion', '0015_remove_credit_agent', '2025-06-17 00:41:41.999999'),
+(34, 'gestion', '0016_remove_historiquetransaction_agent_credit_agent', '2025-06-17 00:45:19.815440'),
+(35, 'gestion', '0017_historiquetransaction_agent', '2025-06-17 01:40:29.461904'),
+(36, 'gestion', '0018_remove_historiquetransaction_agent', '2025-06-17 02:07:54.513613'),
+(37, 'gestion', '0019_alter_agent_role', '2025-06-17 03:14:59.060571');
 
 -- --------------------------------------------------------
 
@@ -226,10 +251,19 @@ INSERT INTO `django_session` (`session_key`, `session_data`, `expire_date`) VALU
 ('1878dy059ko8foaj3l9t5d4sdw60403a', '.eJxVjDEOwjAMRe-SGUWOU3DCyM4ZIid2SQG1UtNOiLtDpQ6w_vfef5nE61LT2nROg5izcebwu2UuDx03IHceb5Mt07jMQ7abYnfa7HUSfV529--gcqvf2ouLGgSACGIIhZhOTH2Ogv5IPauQJ1BAx8iYuwBOPWKHAEU8qHl_AM8kNys:1uMwSC:RkoeFs_1HMd0JncLoAVYD3tsTyt27Qdp28H_wsuUKxg', '2025-06-18 22:19:24.066774'),
 ('1d500o1c22kb1ep1t7ir1a9j1z0ep65t', '.eJxVjDEOwjAMRe-SGUWOU3DCyM4ZIid2SQG1UtNOiLtDpQ6w_vfef5nE61LT2nROg5izcebwu2UuDx03IHceb5Mt07jMQ7abYnfa7HUSfV529--gcqvf2ouLGgSACGIIhZhOTH2Ogv5IPauQJ1BAx8iYuwBOPWKHAEU8qHl_AM8kNys:1uMZn7:QWEMFINeQSKxFCP9x2IdR2icBlK3WAwyJo7hyhZPeS0', '2025-06-17 22:07:29.124414'),
 ('2ppage3c160cmcuy3omgodbna34dedjl', '.eJxVjDEOwjAMRe-SGUWOU3DCyM4ZIid2SQG1UtNOiLtDpQ6w_vfef5nE61LT2nROg5izcebwu2UuDx03IHceb5Mt07jMQ7abYnfa7HUSfV529--gcqvf2ouLGgSACGIIhZhOTH2Ogv5IPauQJ1BAx8iYuwBOPWKHAEU8qHl_AM8kNys:1uP0vZ:H1pI9rw2Z5x2w9Y2OwO9vxMtGk_GxdJoaUEjYQkO0Rc', '2025-06-24 15:30:17.376718'),
+('6ca6wu97mwgiqwbz9fxpaf1mub2f7re8', '.eJxVjEEOwiAQRe_C2hBA6Exduu8ZyACDVA0kpV0Z765NutDtf-_9l_C0rcVvnRc_J3ERRpx-t0DxwXUH6U711mRsdV3mIHdFHrTLqSV-Xg_376BQL986aJOtTaMiVGcbAfLICCkislUuD5ED2agwOyRFYLQiN0AwgDozIIv3B-PpN-I:1uQLqf:I_QXueoKNO_LzNL1DDURLCpsSrKPtZfU7UXEQpyEpZY', '2025-06-28 08:02:45.598897'),
 ('8s90qpuqt3ew3bkk3oy365jj3dkl2pvi', '.eJxVjDEOwjAMRe-SGUWOU3DCyM4ZIid2SQG1UtNOiLtDpQ6w_vfef5nE61LT2nROg5izcebwu2UuDx03IHceb5Mt07jMQ7abYnfa7HUSfV529--gcqvf2ouLGgSACGIIhZhOTH2Ogv5IPauQJ1BAx8iYuwBOPWKHAEU8qHl_AM8kNys:1uIsIU:T_QLdaGiOAYAYij_8aRF446NrulVdkv96JauHSE6IqU', '2025-06-07 17:04:34.630913'),
 ('bo5o0ne7i6qvgttwe4pu0weld1iv2zzn', '.eJxVjDEOwjAMRe-SGUWOU3DCyM4ZIid2SQG1UtNOiLtDpQ6w_vfef5nE61LT2nROg5izcebwu2UuDx03IHceb5Mt07jMQ7abYnfa7HUSfV529--gcqvf2ouLGgSACGIIhZhOTH2Ogv5IPauQJ1BAx8iYuwBOPWKHAEU8qHl_AM8kNys:1uOTVs:MNfoNd5gNndO_j06tX09zhlj1elajPyVnu6yhMsv93c', '2025-06-23 03:49:32.432235'),
+('d5kuszv9mxqgps624mxmeu1mkx3fgloh', '.eJxVjDEOwjAMRe-SGUWOU3DCyM4ZIid2SQG1UtNOiLtDpQ6w_vfef5nE61LT2nROg5izcebwu2UuDx03IHceb5Mt07jMQ7abYnfa7HUSfV529--gcqvf2ouLGgSACGIIhZhOTH2Ogv5IPauQJ1BAx8iYuwBOPWKHAEU8qHl_AM8kNys:1uQpt4:jx9SQBkznkeXhlb4YHPnfjZjot_33Eqf9Z9kA6XE_4A', '2025-06-29 16:07:14.979907'),
+('dnvz11thtqusfxorypqijlz17uvnd4nb', '.eJxVjEEOwiAQRe_C2hBA6Exduu8ZyACDVA0kpV0Z765NutDtf-_9l_C0rcVvnRc_J3ERRpx-t0DxwXUH6U711mRsdV3mIHdFHrTLqSV-Xg_376BQL986aJOtTaMiVGcbAfLICCkislUuD5ED2agwOyRFYLQiN0AwgDozIIv3B-PpN-I:1uQqo9:z83shOe2saWgemjUf74KjSpMGccLFfWJu-zXBOdcUkw', '2025-06-29 17:06:13.998104'),
+('dzoo0audyndjj6tcts67mjchnvm3s0t5', '.eJxVjDEOwjAMRe-SGUWOU3DCyM4ZIid2SQG1UtNOiLtDpQ6w_vfef5nE61LT2nROg5izcebwu2UuDx03IHceb5Mt07jMQ7abYnfa7HUSfV529--gcqvf2ouLGgSACGIIhZhOTH2Ogv5IPauQJ1BAx8iYuwBOPWKHAEU8qHl_AM8kNys:1uRINM:jPbTcJt-Yely5OVEgMumMRzbOFQPHniW2Mlc_Y9ygis', '2025-06-30 22:32:24.434240'),
+('g0o7jc84yc0etgeqdzfgecwsrgmpeqdq', '.eJxVjDsOwjAQBe_iGllxduM4lPScIdpfSADZUj4V4u4QKQW0b2bey_W0rWO_LTb3k7qzQ3f63ZjkYXkHeqd8K15KXueJ_a74gy7-WtSel8P9OxhpGb81JIRAcQhsyClGCigGamIpVFFBmGNd48AgWkFrSNokYMQhUNs1nXt_APCVOCk:1uRMrV:RENYP933_06A5TOVql3_ax8ucK8lheKmsWIXScgdeeQ', '2025-07-01 03:19:49.920188'),
 ('g396ebrcgx7zzlwgy2kewh266fjhj5zu', '.eJxVjDEOwjAMRe-SGUWOU3DCyM4ZIid2SQG1UtNOiLtDpQ6w_vfef5nE61LT2nROg5izcebwu2UuDx03IHceb5Mt07jMQ7abYnfa7HUSfV529--gcqvf2ouLGgSACGIIhZhOTH2Ogv5IPauQJ1BAx8iYuwBOPWKHAEU8qHl_AM8kNys:1uMtrN:aG3HU5Zkfz0SStpgIV9yxmyNH6m0QDriF3aAR-m_edo', '2025-06-18 19:33:13.361626'),
+('hb3eumr2acp8pi8ghe3nq6ysc3qi4cg2', '.eJxVjDsOwjAQBe_iGllxduM4lPScIdpfSADZUj4V4u4QKQW0b2bey_W0rWO_LTb3k7qzQ3f63ZjkYXkHeqd8K15KXueJ_a74gy7-WtSel8P9OxhpGb81JIRAcQhsyClGCigGamIpVFFBmGNd48AgWkFrSNokYMQhUNs1nXt_APCVOCk:1uRKKq:OZJmkBW7RVr_aprJ_mujbaLX-gbmLNAvNKwtif2p0XA', '2025-07-01 00:37:56.568756'),
+('jumgny2so6mbzk4bebitin5jj7llhca8', '.eJxVjEEOwiAQRe_C2hBA6Exduu8ZyACDVA0kpV0Z765NutDtf-_9l_C0rcVvnRc_J3ERRpx-t0DxwXUH6U711mRsdV3mIHdFHrTLqSV-Xg_376BQL986aJOtTaMiVGcbAfLICCkislUuD5ED2agwOyRFYLQiN0AwgDozIIv3B-PpN-I:1uQG7c:HqVioDjJXBnLkp5EJRur_5byBucfkJjKhgjlxBABTPo', '2025-06-28 01:55:52.464948'),
+('lm5ub2armtea8gytcsef2toadpuy9lh9', '.eJxVjEEOwiAQRe_C2hBA6Exduu8ZyACDVA0kpV0Z765NutDtf-_9l_C0rcVvnRc_J3ERRpx-t0DxwXUH6U711mRsdV3mIHdFHrTLqSV-Xg_376BQL986aJOtTaMiVGcbAfLICCkislUuD5ED2agwOyRFYLQiN0AwgDozIIv3B-PpN-I:1uQTAF:64HwcOvX2hKhjib2Js79eyfyH9eeuy75S1E_LG6A5TA', '2025-06-28 15:51:27.299433'),
 ('nt0b33ubi60bwhfzvk221zoejfxo57dm', '.eJxVjDEOwjAMRe-SGUWOU3DCyM4ZIid2SQG1UtNOiLtDpQ6w_vfef5nE61LT2nROg5izcebwu2UuDx03IHceb5Mt07jMQ7abYnfa7HUSfV529--gcqvf2ouLGgSACGIIhZhOTH2Ogv5IPauQJ1BAx8iYuwBOPWKHAEU8qHl_AM8kNys:1uMuEr:oMp521JvtyfkUzhM11vOIMUkV_wLLsiFODEIkmMI2z0', '2025-06-18 19:57:29.324943'),
+('qgq7hbhk4bm3iyzpt2wtvjknlap9z98s', '.eJxVjDsOwjAQBe_iGlm2s86uKek5g7X-4QBypDipEHeHSCmgfTPzXsLztla_9bz4KYmzGMXpdwscH7ntIN253WYZ57YuU5C7Ig_a5XVO-Xk53L-Dyr1-a3JO6WIQKY_FglIRI1uNHBjYDBQsGU0ZHVIAIAMxO-3KEFQqgAnE-wPDSDcv:1uRJ64:AjY2QsdXZVwa_D1xY4Xqy85V5ZoR5dpISHGc-8BxC8I', '2025-06-30 23:18:36.437714'),
 ('s4y7shbbdu9pwxb62wsor8p4mslqbu1z', '.eJxVjDEOwjAMRe-SGUWOU3DCyM4ZIid2SQG1UtNOiLtDpQ6w_vfef5nE61LT2nROg5izcebwu2UuDx03IHceb5Mt07jMQ7abYnfa7HUSfV529--gcqvf2ouLGgSACGIIhZhOTH2Ogv5IPauQJ1BAx8iYuwBOPWKHAEU8qHl_AM8kNys:1uMtrN:aG3HU5Zkfz0SStpgIV9yxmyNH6m0QDriF3aAR-m_edo', '2025-06-18 19:33:13.333575'),
 ('tp7l7jhrm5blwsstqtzvz1qruxl03wk1', '.eJxVjDEOwjAMRe-SGUWOU3DCyM4ZIid2SQG1UtNOiLtDpQ6w_vfef5nE61LT2nROg5izcebwu2UuDx03IHceb5Mt07jMQ7abYnfa7HUSfV529--gcqvf2ouLGgSACGIIhZhOTH2Ogv5IPauQJ1BAx8iYuwBOPWKHAEU8qHl_AM8kNys:1uMwSC:RkoeFs_1HMd0JncLoAVYD3tsTyt27Qdp28H_wsuUKxg', '2025-06-18 22:19:24.095407'),
 ('z4n89m67hd26yvgbfo5q1ffsaybezp26', '.eJxVjDEOwjAMRe-SGUWOU3DCyM4ZIid2SQG1UtNOiLtDpQ6w_vfef5nE61LT2nROg5izcebwu2UuDx03IHceb5Mt07jMQ7abYnfa7HUSfV529--gcqvf2ouLGgSACGIIhZhOTH2Ogv5IPauQJ1BAx8iYuwBOPWKHAEU8qHl_AM8kNys:1uMwOa:io5VIG_x1oWpikHmb1FAoKMF8rPxDNd2E5GawAhJA4A', '2025-06-18 22:15:40.658708');
@@ -252,7 +286,7 @@ CREATE TABLE `gestion_agent` (
   `is_staff` tinyint(1) NOT NULL,
   `is_active` tinyint(1) NOT NULL,
   `date_joined` datetime(6) NOT NULL,
-  `role` varchar(10) NOT NULL
+  `role` varchar(15) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -260,7 +294,8 @@ CREATE TABLE `gestion_agent` (
 --
 
 INSERT INTO `gestion_agent` (`id`, `password`, `last_login`, `is_superuser`, `username`, `first_name`, `last_name`, `email`, `is_staff`, `is_active`, `date_joined`, `role`) VALUES
-(1, 'pbkdf2_sha256$600000$rpXSRX0jknl9LpG6miMWx3$SShpePHVKO4adXmoUqgz9D/5rmT9aIesZbN59EQmJ4w=', '2025-06-10 15:30:17.326325', 1, 'microfinance', '', '', 'aholiacherel@gmail.com', 1, 1, '2025-05-24 16:58:47.340726', 'agent');
+(4, 'pbkdf2_sha256$600000$xIiUvYuvaHKPTEoOPC6IM3$z0MwbgBRJOGowcMTytmdCsWMG2oTXrUyfNe6Jrtf6BY=', '2025-06-17 03:19:49.847981', 0, 'superviseur', 'AHOLIA', 'ADJI', 'aholiacherel@gmail.com', 0, 1, '2025-06-16 22:57:28.000000', 'superviseur'),
+(5, 'pbkdf2_sha256$600000$IGUq7O8VpbyjvTjLjdx4u3$bMlM4bvAEHLPqEE1R5r3K51zQ/KldYR2txwu/H0ZXFM=', '2025-06-17 03:15:37.189580', 1, 'Microfinance', '', '', 'aholiacherel@gmail.com', 1, 1, '2025-06-16 23:00:42.039568', 'agent');
 
 -- --------------------------------------------------------
 
@@ -296,13 +331,35 @@ CREATE TABLE `gestion_client` (
   `id` bigint(20) NOT NULL,
   `nom` varchar(100) NOT NULL,
   `telephone` varchar(20) NOT NULL,
-  `adresse` longtext NOT NULL,
+  `adresse` varchar(150) NOT NULL,
   `prenom` varchar(100) NOT NULL,
   `date_inscription` date NOT NULL,
   `email` varchar(254) DEFAULT NULL,
   `agent_id` bigint(20) NOT NULL,
   `identifiant` varchar(10) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Déchargement des données de la table `gestion_client`
+--
+
+INSERT INTO `gestion_client` (`id`, `nom`, `telephone`, `adresse`, `prenom`, `date_inscription`, `email`, `agent_id`, `identifiant`) VALUES
+(15, 'Tuo', '0104550613', 'Taabo,Commune', 'Mohamed', '2025-06-17', 'mohamed@outlook.com', 4, 'ID9937337'),
+(16, 'Gogoua', '0798884421', 'Grand-Bassam', 'Pierre', '2025-06-17', 'mermoz@gmail.com', 4, 'ID6302582'),
+(17, 'Dupont', '+2250700123456', '12 Rue des Fleurs, Abidjan', 'Jean', '2025-06-17', 'jean.dupont@example.com', 4, 'ID5915646'),
+(19, 'Traoré', '+2250700654321', '5 Avenue de la Paix, Yamoussoukro', 'Aminata', '2025-06-17', 'aminata.traore@example.com', 4, 'ID7734452'),
+(20, 'Kone', '+2250700102030', '10 Allée des Roses, Aboisso', 'Salimata', '2025-06-17', 'salimata.kone@example.com', 4, 'ID0018472'),
+(21, 'Diaby', '+2250700998877', '4 Place du Marché, Gagnoa', 'Safi', '2025-06-17', 'safi.diaby@example.com', 4, 'ID5257033'),
+(22, 'Diaby', '+2250700998877', '4 Place du Marché, Gagnoa', 'Safi', '2025-06-17', 'safi.diaby@example.com', 4, 'ID6325743'),
+(23, 'Ouattara', '+2250700332211', '20 Rue des Artistes, Abidjan', 'Aïcha', '2025-06-17', 'aicha.ouattara@example.com', 4, 'ID1745386'),
+(24, 'Diallo', '+2250700445566', '1 Impasse des Palmiers, Korhogo', 'Fatou', '2025-06-17', 'fatou.diallo@example.com', 4, 'ID9849308'),
+(25, 'Doumbia', '+2250700223344', '1 Allée des Baobabs, Bouaké', 'Fatoumata', '2025-06-17', 'fatou.doumbia@example.com', 4, 'ID7132621'),
+(26, 'Diop', '+2250700556677', '9 Rue du Foyer, Korhogo', 'Moussa', '2025-06-17', 'moussa.soro@example.com', 4, 'ID8229227'),
+(27, 'Dao', '+2250700889900', '14 Boulevard du Port, Abidjan', 'Awa', '2025-06-17', 'awa.dao@example.com', 4, 'ID2354350'),
+(28, 'Kouame', '+2250700121212', '2 Rue des Écoles, Daloa', 'Patrick', '2025-06-17', 'patrick.kouame@example.com', 4, 'ID8206639'),
+(29, 'Kone', '+2250700121212', 'Pharmacie Etoile, Abobo', 'Aboudramane', '2025-06-17', 'kone@gmail.com', 4, 'ID9303148'),
+(30, 'Sekongo', '0546110591', 'Port-Bouët', 'yely', '2025-06-17', 'yeli@gmail.com', 4, 'ID5889929'),
+(31, 'mari', '0546110591', 'ABOBO, Sogephia', 'Koffi', '2025-06-17', 'mk@example.com', 4, 'ID7555219');
 
 -- --------------------------------------------------------
 
@@ -315,8 +372,35 @@ CREATE TABLE `gestion_compte` (
   `solde` decimal(12,2) NOT NULL,
   `client_id` bigint(20) NOT NULL,
   `date_creation` date NOT NULL,
-  `numero_compte` varchar(20) NOT NULL
+  `numero_compte` varchar(20) NOT NULL,
+  `type_compte` varchar(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Déchargement des données de la table `gestion_compte`
+--
+
+INSERT INTO `gestion_compte` (`id`, `solde`, `client_id`, `date_creation`, `numero_compte`, `type_compte`) VALUES
+(21, 4700.00, 15, '2025-06-17', 'C-202506174244', 'epargne'),
+(22, 8000.00, 16, '2025-06-17', 'C-202506171723', 'epargne'),
+(23, 14100.00, 17, '2025-06-17', 'C-202506174935', 'epargne'),
+(24, 79500.00, 19, '2025-06-17', 'C-202506178735', 'epargne'),
+(25, 0.00, 20, '2025-06-17', 'C-202506174689', 'epargne'),
+(26, 0.00, 21, '2025-06-17', 'C-202506178905', 'epargne'),
+(27, 0.00, 22, '2025-06-17', 'C-202506173428', 'epargne'),
+(28, 0.00, 23, '2025-06-17', 'C-202506174865', 'epargne'),
+(29, 0.00, 24, '2025-06-17', 'C-202506177983', 'epargne'),
+(30, 2000.00, 19, '2025-06-17', 'C-202506176336', 'courant'),
+(31, 4500.00, 23, '2025-06-17', 'C-202506174683', 'courant'),
+(32, 5500.00, 25, '2025-06-17', 'C-202506172550', 'epargne'),
+(33, 5000.00, 26, '2025-06-17', 'C-202506177279', 'epargne'),
+(34, 170000.00, 27, '2025-06-17', 'C-202506174119', 'epargne'),
+(35, 0.00, 28, '2025-06-17', 'C-202506174485', 'epargne'),
+(36, 0.00, 29, '2025-06-17', 'C-202506177190', 'epargne'),
+(37, 7020.00, 17, '2025-06-17', 'C-202506175607', 'courant'),
+(38, 7000.00, 29, '2025-06-17', 'C-202506175291', 'courant'),
+(39, 10000.00, 30, '2025-06-17', 'C-202506174050', 'epargne'),
+(40, 0.00, 31, '2025-06-17', 'C-202506173729', 'epargne');
 
 -- --------------------------------------------------------
 
@@ -332,8 +416,23 @@ CREATE TABLE `gestion_credit` (
   `compte_id` bigint(20) NOT NULL,
   `date_octroi` date NOT NULL,
   `duree_mois` int(10) UNSIGNED NOT NULL CHECK (`duree_mois` >= 0),
+  `numero_credit` varchar(50) NOT NULL,
+  `montant_rembourse` decimal(12,2) NOT NULL,
   `agent_id` bigint(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Déchargement des données de la table `gestion_credit`
+--
+
+INSERT INTO `gestion_credit` (`id`, `montant`, `taux_interet`, `statut`, `compte_id`, `date_octroi`, `duree_mois`, `numero_credit`, `montant_rembourse`, `agent_id`) VALUES
+(17, 1500.00, 3.00, 'EN_COURS', 21, '2025-06-17', 12, 'CR-20250617023414164739', 0.00, 4),
+(18, 40000.00, 4.00, 'EN_COURS', 24, '2025-06-17', 32, 'CR-20250617030150250287', 0.00, 4),
+(19, 5000.00, 1.20, 'EN_COURS', 33, '2025-06-17', 12, 'CR-20250617030207046717', 0.00, 4),
+(20, 42000.00, 2.00, 'EN_COURS', 24, '2025-06-17', 34, 'CR-20250617030232557051', 0.00, 4),
+(21, 345000.00, 5.00, 'EN_COURS', 34, '2025-06-17', 15, 'CR-20250617030258617855', 0.00, 4),
+(22, 3000.00, 1.20, 'EN_COURS', 21, '2025-06-17', 8, 'CR-20250617030321995197', 0.00, 4),
+(23, 1100.00, 2.00, 'EN_COURS', 23, '2025-06-17', 23, 'CR-20250617053513953666', 0.00, 4);
 
 -- --------------------------------------------------------
 
@@ -350,6 +449,32 @@ CREATE TABLE `gestion_historiquetransaction` (
   `compte_id` bigint(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Déchargement des données de la table `gestion_historiquetransaction`
+--
+
+INSERT INTO `gestion_historiquetransaction` (`id`, `type_operation`, `montant`, `date`, `description`, `compte_id`) VALUES
+(46, 'DEPOT', 2000.00, '2025-06-17 02:33:37.039531', 'DEPOT effectué par AHOLIA ADJI', 21),
+(47, 'DEPOT', 10000.00, '2025-06-17 02:33:48.375096', 'DEPOT effectué par AHOLIA ADJI', 22),
+(48, 'RETRAIT', 2000.00, '2025-06-17 02:33:56.301962', 'RETRAIT effectué par AHOLIA ADJI', 22),
+(49, 'CREDIT', 1500.00, '2025-06-17 02:34:14.215150', 'Crédit octroyé (Numéro: CR-20250617023414164739)', 21),
+(50, 'REMBOURSEMENT', 800.00, '2025-06-17 02:34:32.268162', 'Remboursement crédit (REM-20250617023432185639) - Principal: 800, Intérêts: 0.00', 21),
+(51, 'RETRAIT', 3000.00, '2025-06-17 02:59:52.224624', 'RETRAIT effectué par AHOLIA ADJI', 38),
+(52, 'RETRAIT', 1000.00, '2025-06-17 03:00:01.624725', 'RETRAIT effectué par AHOLIA ADJI', 21),
+(53, 'DEPOT', 5500.00, '2025-06-17 03:00:23.285222', 'DEPOT effectué par AHOLIA ADJI', 32),
+(54, 'DEPOT', 20000.00, '2025-06-17 03:00:49.229718', 'DEPOT effectué par AHOLIA ADJI', 23),
+(55, 'RETRAIT', 7000.00, '2025-06-17 03:01:09.732196', 'RETRAIT effectué par AHOLIA ADJI', 23),
+(56, 'CREDIT', 40000.00, '2025-06-17 03:01:50.422091', 'Crédit octroyé (Numéro: CR-20250617030150250287)', 24),
+(57, 'CREDIT', 5000.00, '2025-06-17 03:02:07.095512', 'Crédit octroyé (Numéro: CR-20250617030207046717)', 33),
+(58, 'CREDIT', 42000.00, '2025-06-17 03:02:32.608755', 'Crédit octroyé (Numéro: CR-20250617030232557051)', 24),
+(59, 'CREDIT', 345000.00, '2025-06-17 03:02:58.617855', 'Crédit octroyé (Numéro: CR-20250617030258617855)', 34),
+(60, 'CREDIT', 3000.00, '2025-06-17 03:03:22.063585', 'Crédit octroyé (Numéro: CR-20250617030321995197)', 21),
+(61, 'DEPOT', 10000.00, '2025-06-17 03:04:39.610151', 'DEPOT effectué par AHOLIA ADJI', 39),
+(62, 'REMBOURSEMENT', 150000.00, '2025-06-17 03:05:12.833843', 'Remboursement crédit (REM-20250617030512703157) - Principal: 150000, Intérêts: 0.00', 34),
+(63, 'REMBOURSEMENT', 2500.00, '2025-06-17 03:05:32.522663', 'Remboursement crédit (REM-20250617030532456782) - Principal: 2500, Intérêts: 0.00', 24),
+(64, 'RETRAIT', 25000.00, '2025-06-17 05:32:31.288729', 'RETRAIT effectué par AHOLIA ADJI', 34),
+(65, 'CREDIT', 1100.00, '2025-06-17 05:35:14.113593', 'Crédit octroyé (Numéro: CR-20250617053513953666)', 23);
+
 -- --------------------------------------------------------
 
 --
@@ -365,6 +490,22 @@ CREATE TABLE `gestion_mouvement` (
   `agent_id` bigint(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Déchargement des données de la table `gestion_mouvement`
+--
+
+INSERT INTO `gestion_mouvement` (`id`, `type_mouvement`, `montant`, `date`, `compte_id`, `agent_id`) VALUES
+(25, 'DEPOT', 2000.00, '2025-06-17 02:33:36.992658', 21, 4),
+(26, 'DEPOT', 10000.00, '2025-06-17 02:33:48.254436', 22, 4),
+(27, 'RETRAIT', 2000.00, '2025-06-17 02:33:56.286804', 22, 4),
+(28, 'RETRAIT', 3000.00, '2025-06-17 02:59:52.084238', 38, 4),
+(29, 'RETRAIT', 1000.00, '2025-06-17 03:00:01.624725', 21, 4),
+(30, 'DEPOT', 5500.00, '2025-06-17 03:00:22.968353', 32, 4),
+(31, 'DEPOT', 20000.00, '2025-06-17 03:00:49.214829', 23, 4),
+(32, 'RETRAIT', 7000.00, '2025-06-17 03:01:09.475016', 23, 4),
+(33, 'DEPOT', 10000.00, '2025-06-17 03:04:39.559644', 39, 4),
+(34, 'RETRAIT', 25000.00, '2025-06-17 05:32:31.147351', 34, 4);
+
 -- --------------------------------------------------------
 
 --
@@ -375,8 +516,24 @@ CREATE TABLE `gestion_remboursement` (
   `id` bigint(20) NOT NULL,
   `montant` decimal(10,2) NOT NULL,
   `credit_id` bigint(20) NOT NULL,
-  `date` date NOT NULL
+  `date` datetime(6) NOT NULL,
+  `agent_id` bigint(20) DEFAULT NULL,
+  `methode_paiement` varchar(50) NOT NULL,
+  `montant_interet` decimal(10,2) NOT NULL,
+  `montant_principal` decimal(10,2) NOT NULL,
+  `notes` longtext DEFAULT NULL,
+  `numero_remboursement` varchar(50) NOT NULL,
+  `reference` varchar(100) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Déchargement des données de la table `gestion_remboursement`
+--
+
+INSERT INTO `gestion_remboursement` (`id`, `montant`, `credit_id`, `date`, `agent_id`, `methode_paiement`, `montant_interet`, `montant_principal`, `notes`, `numero_remboursement`, `reference`) VALUES
+(14, 800.00, 17, '2025-06-17 00:00:00.000000', 4, 'ESPECES', 0.00, 800.00, '', 'REM-20250617023432185639', ''),
+(15, 150000.00, 21, '2025-06-17 00:00:00.000000', 4, 'MOBILE_MONEY', 0.00, 150000.00, '', 'REM-20250617030512703157', ''),
+(16, 2500.00, 18, '2025-06-17 00:00:00.000000', 4, 'ESPECES', 0.00, 2500.00, '', 'REM-20250617030532456782', '');
 
 --
 -- Index pour les tables déchargées
@@ -476,6 +633,7 @@ ALTER TABLE `gestion_compte`
 --
 ALTER TABLE `gestion_credit`
   ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `numero_credit` (`numero_credit`),
   ADD KEY `gestion_credit_compte_id_b2ccade1_fk_gestion_compte_id` (`compte_id`),
   ADD KEY `gestion_credit_agent_id_4a24a73d_fk_gestion_agent_id` (`agent_id`);
 
@@ -499,7 +657,9 @@ ALTER TABLE `gestion_mouvement`
 --
 ALTER TABLE `gestion_remboursement`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `gestion_remboursement_credit_id_f0108c20_fk_gestion_credit_id` (`credit_id`);
+  ADD UNIQUE KEY `numero_remboursement` (`numero_remboursement`),
+  ADD KEY `gestion_remboursement_credit_id_f0108c20_fk_gestion_credit_id` (`credit_id`),
+  ADD KEY `gestion_remboursement_agent_id_e78f9260_fk_gestion_agent_id` (`agent_id`);
 
 --
 -- AUTO_INCREMENT pour les tables déchargées
@@ -527,7 +687,7 @@ ALTER TABLE `auth_permission`
 -- AUTO_INCREMENT pour la table `django_admin_log`
 --
 ALTER TABLE `django_admin_log`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT pour la table `django_content_type`
@@ -539,13 +699,13 @@ ALTER TABLE `django_content_type`
 -- AUTO_INCREMENT pour la table `django_migrations`
 --
 ALTER TABLE `django_migrations`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
 -- AUTO_INCREMENT pour la table `gestion_agent`
 --
 ALTER TABLE `gestion_agent`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT pour la table `gestion_agent_groups`
@@ -563,37 +723,37 @@ ALTER TABLE `gestion_agent_user_permissions`
 -- AUTO_INCREMENT pour la table `gestion_client`
 --
 ALTER TABLE `gestion_client`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 
 --
 -- AUTO_INCREMENT pour la table `gestion_compte`
 --
 ALTER TABLE `gestion_compte`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
 
 --
 -- AUTO_INCREMENT pour la table `gestion_credit`
 --
 ALTER TABLE `gestion_credit`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT pour la table `gestion_historiquetransaction`
 --
 ALTER TABLE `gestion_historiquetransaction`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=66;
 
 --
 -- AUTO_INCREMENT pour la table `gestion_mouvement`
 --
 ALTER TABLE `gestion_mouvement`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
 
 --
 -- AUTO_INCREMENT pour la table `gestion_remboursement`
 --
 ALTER TABLE `gestion_remboursement`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- Contraintes pour les tables déchargées
@@ -669,6 +829,7 @@ ALTER TABLE `gestion_mouvement`
 -- Contraintes pour la table `gestion_remboursement`
 --
 ALTER TABLE `gestion_remboursement`
+  ADD CONSTRAINT `gestion_remboursement_agent_id_e78f9260_fk_gestion_agent_id` FOREIGN KEY (`agent_id`) REFERENCES `gestion_agent` (`id`),
   ADD CONSTRAINT `gestion_remboursement_credit_id_f0108c20_fk_gestion_credit_id` FOREIGN KEY (`credit_id`) REFERENCES `gestion_credit` (`id`);
 COMMIT;
 
