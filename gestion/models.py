@@ -10,20 +10,22 @@ from decimal import Decimal, InvalidOperation
 # =========================
 class Agent(AbstractUser):
     ROLE_CHOICES = (
-        ('admin', 'Admin'),
-        ('agent', 'Agent'),
+        ('superviseur', 'Superviseur'),
     )
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='agent')
+    role = models.CharField(max_length=15, choices=ROLE_CHOICES, default='agent')
 
     def __str__(self):
         return self.get_full_name() or self.username
 
+    @property
+    def is_superviseur(self):
+        return self.role == 'superviseur'
 
 # =========================
 # CLIENT
 # =========================
 class Client(models.Model):
-    agent = models.ForeignKey(Agent, on_delete=models.CASCADE, related_name="clients")
+    agent = models.ForeignKey(Agent, on_delete=models.CASCADE, related_name="client")
     identifiant = models.CharField(max_length=10, unique=True, editable=False)
     nom = models.CharField(max_length=100)
     prenom = models.CharField(max_length=100)
@@ -150,6 +152,7 @@ class HistoriqueTransaction(models.Model):
     montant = models.DecimalField(max_digits=12, decimal_places=2)
     date = models.DateTimeField(default=timezone.now)
     description = models.TextField(blank=True)
+
 
     def __str__(self):
         return f"{self.type_operation} de {self.montant} sur {self.compte.numero_compte}"
